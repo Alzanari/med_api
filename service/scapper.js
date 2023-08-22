@@ -43,7 +43,7 @@ const scapItem = async (url, type) => {
   $("table > tbody")
     .find("tr")
     .each(function () {
-      const field = $(this).find("td.field").text().trim();
+      const field = $(this).find("td.field").text().trim().split(" ").join("_");
       let value = null;
       if (field === "Téléphone" || field === "Fax") {
         value = [];
