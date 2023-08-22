@@ -9,6 +9,7 @@ const MedSchema = new mongoose.Schema(
     link: {
       type: String,
       required: true,
+      index: { unique: true },
     },
     Distributeur_ou_fabriquant: {
       type: mongoose.Schema.Types.ObjectId,

@@ -9,6 +9,7 @@ const LabSchema = new mongoose.Schema(
     link: {
       type: String,
       required: true,
+      index: { unique: true },
     },
   },
   { strict: false }
