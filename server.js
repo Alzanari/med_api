@@ -1,4 +1,5 @@
 const express = require("express");
+require("dotenv").config();
 const { getItems } = require("./services/scapper");
 const mongoose = require("mongoose");
 
