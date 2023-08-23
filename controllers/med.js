@@ -1,14 +1,27 @@
 const getAllMeds = (req, res) => {
-  // Logic to retrieve all tasks
-  res.json(); // Replace with actual data
+  res.json();
+};
+
+const createMed = (req, res) => {
+  res.json({});
 };
 
 const getMedById = (req, res) => {
-  // Logic to retrieve a task by ID
-  res.json({}); // Replace with actual data
+  res.json({});
+};
+
+const updateMedById = (req, res) => {
+  res.json({});
+};
+
+const deleteMedById = (req, res) => {
+  res.json({});
 };
 
 module.exports = {
   getAllMeds,
   getMedById,
+  createMed,
+  updateMedById,
+  deleteMedById,
 };

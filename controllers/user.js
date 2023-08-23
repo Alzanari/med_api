@@ -1,14 +1,27 @@
 const getAllUsers = (req, res) => {
-  // Logic to retrieve all tasks
-  res.json(); // Replace with actual data
+  res.json();
+};
+
+const createUser = (req, res) => {
+  res.json({});
 };
 
 const getUserById = (req, res) => {
-  // Logic to retrieve a task by ID
-  res.json({}); // Replace with actual data
+  res.json({});
+};
+
+const updateUserById = (req, res) => {
+  res.json({});
+};
+
+const deleteUserById = (req, res) => {
+  res.json({});
 };
 
 module.exports = {
   getAllUsers,
+  createUser,
   getUserById,
+  updateUserById,
+  deleteUserById,
 };

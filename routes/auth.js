@@ -3,7 +3,6 @@ const router = express.Router();
 const authController = require("../controllers/auth");
 
 // Define routes using the taskController methods
-router.get("/login", authController.Login);
-router.get("/logout", authController.Logout);
+router.route("/").get(authController.Logout).post(authController.Login);
 
 module.exports = router;
