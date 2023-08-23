@@ -2,7 +2,6 @@ const express = require("express");
 const { getItems } = require("./service/scapper");
 const mongoose = require("mongoose");
 const fs = require("fs");
-const { log } = require("console");
 
 const app = express();
 

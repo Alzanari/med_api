@@ -15,14 +15,18 @@ const MedSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Lab",
     },
-    similar: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Med",
-    },
-    activeSubstance: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Med",
-    },
+    similar: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Med",
+      },
+    ],
+    activeSubstance: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Med",
+      },
+    ],
   },
   { strict: false }
 );
@@ -32,7 +36,7 @@ MedSchema.virtuals(
   {
     ref: "Med",
     localField: "_id",
-    similar: "similar",
+    foreignField: "similar",
     justOne: false,
   },
   { toJSON: { virtuals: true } }
@@ -43,7 +47,7 @@ MedSchema.virtuals(
   {
     ref: "Med",
     localField: "_id",
-    similar: "activeSubstance",
+    foreignField: "activeSubstance",
     justOne: false,
   },
   { toJSON: { virtuals: true } }
