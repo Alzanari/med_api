@@ -33,9 +33,25 @@ async function medBulkUpsert(dataArray) {
   const session = await mongoose.startSession();
   session.startTransaction();
 
+  let labsInDb = await Lab.find({});
   try {
     const bulkOperations1 = dataArray.map((data) => {
-      const { link, similar, activeSubstance, ...updateData } = data;
+      const {
+        link,
+        Distributeur_ou_fabriquant,
+        similar,
+        activeSubstance,
+        ...updateData
+      } = data;
+
+      labsInDb.forEach((lab) => {
+        const foundObject = medsInDb.find(
+          (obj) => obj.title === Distributeur_ou_fabriquant
+        );
+        Distributeur_ou_fabriquant = foundObject._id;
+      });
+      updateData.Distributeur_ou_fabriquant = Distributeur_ou_fabriquant;
+
       return {
         updateOne: {
           filter: { link },
