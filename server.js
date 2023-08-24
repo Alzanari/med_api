@@ -2,6 +2,7 @@ const express = require("express");
 require("dotenv").config();
 const { getItems } = require("./services/scapper");
 const mongoose = require("mongoose");
+const { apiLimiter } = require("./middlewares/rateLimit");
 
 const app = express();
 
@@ -14,12 +15,14 @@ app.use(express.json());
 // }
 
 // Routing section
+// Apply rate limiting middleware
+
+app.use(apiLimiter);
+
 const authRouter = require("./routes/auth");
 const labRouter = require("./routes/lab");
 const medRouter = require("./routes/med");
 const userRouter = require("./routes/user");
-
-// Use the taskRouter for /tasks routes
 app.use("/auth", authRouter);
 app.use("/lab", labRouter);
 app.use("/med", medRouter);
@@ -28,12 +31,13 @@ app.use("/user", userRouter);
 // Cron jobs section
 // require("./service/cronjob")();
 let func = async () => {
-  // let medData = await getItems(
-  //   "https://medicament.ma/listing-des-medicaments/page/29/",
-  //   "med"
-  // );
-  let labData = await getItems("https://medicament.ma/laboratoires/", "lab");
-  console.log(labData);
+  let medData = await getItems(
+    "https://medicament.ma/listing-des-medicaments/page/29/",
+    "med"
+  );
+  console.log(medData);
+  // let labData = await getItems("https://medicament.ma/laboratoires/", "lab");
+  // console.log(labData);
 };
 func();
 
