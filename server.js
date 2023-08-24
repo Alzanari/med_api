@@ -43,6 +43,6 @@ func();
 
 // run server and listen on PORT
 const PORT = process.env.PORT || 3030;
-app.listen(3030, () => {
+app.listen(PORT, () => {
   console.log(`server is live on port ${PORT}`);
 });
