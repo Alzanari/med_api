@@ -107,7 +107,5 @@ const getItems = async (url, type) => {
 */
 
 module.exports = {
-  scapList,
-  scapItem,
   getItems,
 };
