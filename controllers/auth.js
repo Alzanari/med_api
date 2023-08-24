@@ -3,7 +3,27 @@ const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const Login = async (req, res) => {
+const register = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Check if email already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+
+    // Create a new user
+    const newUser = new User({ email, password });
+    await newUser.save();
+
+    res.json({ message: "User registered successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
@@ -20,15 +40,16 @@ const Login = async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
-    // Set the refresh token as a cookie
+    // Set the token and refresh token as a cookie
     res.cookie("refreshToken", refreshToken, { httpOnly: true });
-    res.status(200).json({ token });
+    res.cookie("jwtToken", token, { httpOnly: true });
+    res.status(200).json({ message: "Authentication successful" });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
-const Logout = async (req, res) => {
+const logout = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
 
@@ -38,13 +59,15 @@ const Logout = async (req, res) => {
       { refreshToken: null }
     );
 
-    // Clear the refresh token cookie
+    // Clear the token and refresh token cookie
     res.clearCookie("refreshToken");
+    res.clearCookie("jwtToken");
     res.status(200).json({ message: "Logged out" });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
 const refreshToken = async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
   if (!refreshToken) {
@@ -70,7 +93,8 @@ const refreshToken = async (req, res) => {
           expiresIn: "1h",
         }
       );
-      res.status(200).json({ token: accessToken });
+      res.cookie("jwtToken", accessToken, { httpOnly: true });
+      res.status(200).json({ message: "New token sent successfully" });
     });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
@@ -78,7 +102,8 @@ const refreshToken = async (req, res) => {
 };
 
 module.exports = {
-  Login,
-  Logout,
+  register,
+  login,
+  logout,
   refreshToken,
 };
