@@ -1,0 +1,6 @@
+-Pagination
+-input validation
+-rate limit
+-reports route
+-email integration (for json and cvs export)
+-add+compare with other dbs from neighboring countries (much later)
