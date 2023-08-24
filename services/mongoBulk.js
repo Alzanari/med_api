@@ -45,10 +45,9 @@ async function medBulkUpsert(dataArray) {
       } = data;
 
       labsInDb.forEach((lab) => {
-        const foundObject = medsInDb.find(
-          (obj) => obj.title === Distributeur_ou_fabriquant
-        );
-        Distributeur_ou_fabriquant = foundObject._id;
+        if (lab.title === Distributeur_ou_fabriquant) {
+          Distributeur_ou_fabriquant = lab._id;
+        }
       });
       updateData.Distributeur_ou_fabriquant = Distributeur_ou_fabriquant;
 
