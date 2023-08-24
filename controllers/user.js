@@ -1,21 +1,68 @@
-const getAllUsers = (req, res) => {
-  res.json();
+const mongoose = require("mongoose");
+const User = require("../models/user");
+
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
 
-const createUser = (req, res) => {
-  res.json({});
+const createUser = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const newUser = new User({ email, password });
+    const savedUser = await newUser.save();
+    res.status(201).json(savedUser);
+  } catch (error) {
+    res.status(400).json({ error: "Bad request" });
+  }
 };
 
-const getUserById = (req, res) => {
-  res.json({});
+const getUserById = async (req, res) => {
+  const userId = req.params.id;
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
 
-const updateUserById = (req, res) => {
-  res.json({});
+const updateUserById = async (req, res) => {
+  const userId = req.params.id;
+  const { email, password } = req.body;
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: { email, password } },
+      { new: true }
+    );
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.json(updatedUser);
+  } catch (error) {
+    res.status(400).json({ error: "Bad request" });
+  }
 };
 
-const deleteUserById = (req, res) => {
-  res.json({});
+const deleteUserById = async (req, res) => {
+  const userId = req.params.id;
+  try {
+    const deletedUser = await User.findByIdAndRemove(userId);
+    if (!deletedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.json({ message: "User deleted" });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
 
 module.exports = {
