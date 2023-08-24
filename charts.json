@@ -1,0 +1,66 @@
+{
+  "waysToAnalyze": [
+    {
+      "chartType": "Bar Charts",
+      "analysisMethods": [
+        "Categorical Distribution: Create bar charts to visualize the distribution of categorical variables like 'isGeneric,' 'class,' or 'status.'",
+        "ATC Classification: Show the distribution of medications across different ATC classifications using a bar chart."
+      ]
+    },
+    {
+      "chartType": "Pie Charts",
+      "analysisMethods": [
+        "ATC Classification: Use a pie chart to display the proportion of medications in each ATC classification.",
+        "Refundable Medications: Create a pie chart to visualize the proportion of refundable and non-refundable medications."
+      ]
+    },
+    {
+      "chartType": "Histograms",
+      "analysisMethods": [
+        "Price Distribution: Plot histograms for 'price' and 'hospital price' to understand the distribution of medication prices.",
+        "Refund Price Distribution: Similarly, plot histograms for 'refund price' to analyze the distribution of refund prices."
+      ]
+    },
+    {
+      "chartType": "Scatter Plots",
+      "analysisMethods": [
+        "Price vs. Hospital Price: Use a scatter plot to compare the 'price' and 'hospital price' of medications. This can help you identify any trends or discrepancies.",
+        "Price vs. Refund Price: Create a scatter plot to visualize the relationship between 'price' and 'refund price.'"
+      ]
+    },
+    {
+      "chartType": "Box Plots",
+      "analysisMethods": [
+        "Price by Class: Use box plots to compare the distribution of prices for different medication classes.",
+        "Price by ATC Classification: Create box plots to analyze the price distribution across different ATC classifications."
+      ]
+    },
+    {
+      "chartType": "Stacked Bar Charts",
+      "analysisMethods": [
+        "Status by Class: Visualize the distribution of medication status (e.g., active, inactive) within each medication class using a stacked bar chart.",
+        "Generic vs. Branded: Show the distribution of generic and branded medications within each medication class using a stacked bar chart."
+      ]
+    },
+    {
+      "chartType": "Line Charts",
+      "analysisMethods": [
+        "Price Trends: Plot the trend of medication prices over time to identify any patterns or fluctuations.",
+        "Refund Price Trends: Similarly, plot the trend of refund prices over time."
+      ]
+    },
+    {
+      "chartType": "Heatmaps",
+      "analysisMethods": [
+        "Correlation Matrix: Create a heatmap to visualize the correlation between numerical variables like 'price,' 'hospital price,' 'refund price,' etc."
+      ]
+    },
+    {
+      "chartType": "Radar Charts",
+      "analysisMethods": [
+        "Composition Analysis: If the 'composition' field contains information about different components of the medication, you could use radar charts to compare the composition of different medications."
+      ]
+    }
+  ],
+  "note": "These are just a few examples of how you can analyze your medication data using charts. The choice of charts will depend on the specific insights you want to gain from your data. Remember to label your axes, add titles, and provide context to make your charts more informative."
+}
