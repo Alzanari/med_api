@@ -2,12 +2,12 @@ const mongoose = require("mongoose");
 const Lab = require("../models/lab");
 const Med = require("../models/med");
 
-async function labBulkUpsert(dataArray) {
+async function labBulkUpsert(labArray) {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const bulkOperations = dataArray.map((data) => {
+    const bulkOperations = labArray.map((data) => {
       const { link, ...updateData } = data;
       return {
         updateOne: {
@@ -29,13 +29,15 @@ async function labBulkUpsert(dataArray) {
   }
 }
 
-async function medBulkUpsert(dataArray) {
+async function medBulkUpsert(medArray) {
   const session = await mongoose.startSession();
   session.startTransaction();
 
+  // get labs from database
   let labsInDb = await Lab.find({});
   try {
-    const bulkOperations1 = dataArray.map((data) => {
+    const bulkOperations1 = medArray.map((data) => {
+      // split med object and seperate similar and activeSubstance from the rest of the data
       const {
         link,
         Distributeur_ou_fabriquant,
@@ -44,13 +46,14 @@ async function medBulkUpsert(dataArray) {
         ...updateData
       } = data;
 
+      // match fab to lab title, if match found get id and add it to updatedata fab property
       labsInDb.forEach((lab) => {
         if (lab.title === Distributeur_ou_fabriquant) {
-          Distributeur_ou_fabriquant = lab._id;
+          updateData.Distributeur_ou_fabriquant = lab._id;
         }
       });
-      updateData.Distributeur_ou_fabriquant = Distributeur_ou_fabriquant;
 
+      // return the required structure for upsert
       return {
         updateOne: {
           filter: { link },
@@ -60,9 +63,13 @@ async function medBulkUpsert(dataArray) {
       };
     });
 
+    // upsert the new med data to the database sans similar and activeSubstance
     await Med.bulkWrite(bulkOperations1, { session });
+
+    // get the updated med list from database
     let medsInDb = await Med.find({});
 
+    // loop through the med list and get each similar and activeSubstance item it's _id in our database
     medsInDb.forEach((medDb) => {
       medDb.similar.forEach((sim) => {
         const foundObject = medsInDb.find((obj) => obj.link === sim.link);
@@ -74,6 +81,7 @@ async function medBulkUpsert(dataArray) {
       });
     });
 
+    // return the required structure for similar and activeSubstance update
     const bulkOperations2 = medsInDb.map((data) => {
       const { _id, similar, activeSubstance } = data;
       return {
@@ -85,6 +93,7 @@ async function medBulkUpsert(dataArray) {
       };
     });
 
+    // update similar and activeSubstance for each med in our databse
     await Med.bulkWrite(bulkOperations2, { session });
 
     await session.commitTransaction();
