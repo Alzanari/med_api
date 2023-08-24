@@ -9,7 +9,7 @@ const { labBulkUpsert, medBulkUpsert } = require("./mongoBulk");
 // TODO:
 // check the "Dernière mise à jour" in the footer and compare/store it in a json before running the scraper
 
-const settingsFilePath = path.join(__dirname, "config/settings.json");
+const settingsFilePath = path.join(__dirname, "..", "config", "settings.json");
 
 const readSettings = () => {
   try {
