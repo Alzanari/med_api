@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
+const { body, validationResult } = require("express-validator");
 
 function authenticateToken(req, res, next) {
   const token = req.header("Authorization");
@@ -16,40 +17,23 @@ function authenticateToken(req, res, next) {
   });
 }
 
-async function checkRefreshToken(req, res, next) {
-  const refreshToken = req.cookies.refreshToken;
-  if (!refreshToken) {
-    return res.status(401).json({ error: "Refresh token not provided" });
+const loginBodyRules = [
+  body("email").isEmail().withMessage("Please provide a valid email address"),
+  body("password")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters"),
+];
+
+const checkRules = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
-
-  try {
-    const user = await User.findOne({ refreshToken });
-    if (!user) {
-      return res.status(401).json({ error: "Invalid refresh token" });
-    }
-
-    jwt.verify(refreshToken, process.env.REFRESH_SECRET_KEY, (err, decoded) => {
-      if (err) {
-        return res.status(401).json({ error: "Invalid refresh token" });
-      }
-
-      // Generate a new access token
-      const accessToken = jwt.sign(
-        { email: user.email },
-        process.env.SECRET_KEY,
-        {
-          expiresIn: "1h",
-        }
-      );
-      req.accessToken = accessToken;
-      next();
-    });
-  } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
-  }
-}
+  next();
+};
 
 module.exports = {
   authenticateToken,
-  checkRefreshToken,
+  loginBodyRules,
+  checkRules,
 };

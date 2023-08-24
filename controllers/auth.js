@@ -22,7 +22,7 @@ const Login = async (req, res) => {
 
     // Set the refresh token as a cookie
     res.cookie("refreshToken", refreshToken, { httpOnly: true });
-    res.json({ token });
+    res.status(200).json({ token });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
@@ -40,7 +40,38 @@ const Logout = async (req, res) => {
 
     // Clear the refresh token cookie
     res.clearCookie("refreshToken");
-    res.json({ message: "Logged out" });
+    res.status(200).json({ message: "Logged out" });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+const refreshToken = async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) {
+    return res.status(401).json({ error: "Refresh token not provided" });
+  }
+
+  try {
+    const user = await User.findOne({ refreshToken });
+    if (!user) {
+      return res.status(401).json({ error: "Invalid refresh token" });
+    }
+
+    jwt.verify(refreshToken, process.env.REFRESH_SECRET_KEY, (err, decoded) => {
+      if (err) {
+        return res.status(401).json({ error: "Invalid refresh token" });
+      }
+
+      // Generate a new access token
+      const accessToken = jwt.sign(
+        { email: user.email },
+        process.env.SECRET_KEY,
+        {
+          expiresIn: "1h",
+        }
+      );
+      res.status(200).json({ token: accessToken });
+    });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
@@ -49,4 +80,5 @@ const Logout = async (req, res) => {
 module.exports = {
   Login,
   Logout,
+  refreshToken,
 };
