@@ -1,2 +1,2 @@
-# LowDown
-An app for tracking network connected services down time
+# Med API
+An API for scraping and tracking medication data in morocco
