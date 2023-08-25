@@ -31,8 +31,8 @@ const MedSchema = new mongoose.Schema(
   { strict: false }
 );
 
-MedSchema.virtuals(
-  "Similar",
+MedSchema.virtual(
+  "Sim",
   {
     ref: "Med",
     localField: "_id",
@@ -42,8 +42,8 @@ MedSchema.virtuals(
   { toJSON: { virtuals: true } }
 );
 
-MedSchema.virtuals(
-  "ActiveSubstance",
+MedSchema.virtual(
+  "ActSub",
   {
     ref: "Med",
     localField: "_id",
