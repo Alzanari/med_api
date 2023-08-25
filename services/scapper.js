@@ -52,6 +52,14 @@ const scapItem = async (url, type) => {
           .each((i, elem) => {
             value.push(elem.children[0].data.split(" ").join(""));
           });
+      } else if (
+        field === "PPV" ||
+        field === "Prix_hospitalier" ||
+        field === "Base_de_remboursement_/_PPV"
+      ) {
+        let intiVal = $(this).find("td.value").text().trim();
+        const numericString = intiVal.replace(" dhs", "");
+        value = parseFloat(numericString);
       } else if (field === "Siteweb") {
         value = $(this).find("td.value > a").attr("href");
       } else {
