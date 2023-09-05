@@ -4,3 +4,4 @@
 -reports route
 -email integration (for json and cvs export)
 -add+compare with other dbs from neighboring countries (much later)
+-get med id (from similar link) and add it database as a unique value to keep structural integrity similar to the original
