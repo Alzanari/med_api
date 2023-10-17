@@ -36,10 +36,10 @@ async function medBulkUpsert(medArray) {
   // get labs from database
   let labsInDb = await Lab.find({});
   try {
-    const bulkOperations1 = medArray.map((data) => {
+    const bulkOperations = medArray.map((data) => {
       // split med object and seperate similar and activeSubstance from the rest of the data
       const {
-        link,
+        medId,
         Distributeur_ou_fabriquant,
         similar,
         activeSubstance,
@@ -56,7 +56,7 @@ async function medBulkUpsert(medArray) {
       // return the required structure for upsert
       return {
         updateOne: {
-          filter: { link },
+          filter: { medId },
           update: { $set: updateData },
           upsert: true,
         },
@@ -64,25 +64,51 @@ async function medBulkUpsert(medArray) {
     });
 
     // upsert the new med data to the database sans similar and activeSubstance
-    await Med.bulkWrite(bulkOperations1, { session });
+    await Med.bulkWrite(bulkOperations, { session });
 
+    await session.commitTransaction();
+  } catch (error) {
+    console.error("Error performing med bulk :", error);
+    await session.abortTransaction();
+  } finally {
+    session.endSession();
+  }
+}
+
+async function medSimActBulkUpsert(medArray) {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
     // get the updated med list from database
     let medsInDb = await Med.find({});
-
+    let mapSimAct = [];
     // loop through the med list and get each similar and activeSubstance item it's _id in our database
-    medsInDb.forEach((medDb) => {
-      medDb.similar.forEach((sim) => {
-        const foundObject = medsInDb.find((obj) => obj.link === sim.link);
-        sim._id = foundObject._id;
-      });
-      medDb.activeSubstance.forEach((act) => {
-        const foundObject = medsInDb.find((obj) => obj.link === act.link);
-        act._id = foundObject._id;
-      });
+    medArray.forEach((med) => {
+      let medMap = { _id: "", similar: [], activeSubstance: [] };
+      const foundId = medsInDb.find((obj) => obj.link === med.link);
+      medMap._id = foundId._id;
+      for (let i = 0; i < med.similar.length; i++) {
+        const foundSim = medsInDb.find(
+          (obj) => obj.link === med.similar[i].link
+        );
+        if (foundSim != void 0) {
+          medMap.similar.push({ _id: foundSim._id });
+        }
+      }
+      for (let i = 0; i < med.activeSubstance.length; i++) {
+        const foundAct = medsInDb.find(
+          (obj) => obj.link === med.activeSubstance[i].link
+        );
+        if (foundAct != void 0) {
+          medMap.activeSubstance.push({ _id: foundAct._id });
+        }
+      }
+      mapSimAct.push(medMap);
     });
 
     // return the required structure for similar and activeSubstance update
-    const bulkOperations2 = medsInDb.map((data) => {
+    const bulkOperations = mapSimAct.map((data) => {
       const { _id, similar, activeSubstance } = data;
       return {
         updateOne: {
@@ -94,11 +120,11 @@ async function medBulkUpsert(medArray) {
     });
 
     // update similar and activeSubstance for each med in our databse
-    await Med.bulkWrite(bulkOperations2, { session });
+    await Med.bulkWrite(bulkOperations, { session });
 
     await session.commitTransaction();
   } catch (error) {
-    console.error("Error performing lab bulk :", error);
+    console.error("Error performing medSimAct bulk :", error);
     await session.abortTransaction();
   } finally {
     session.endSession();
@@ -108,4 +134,5 @@ async function medBulkUpsert(medArray) {
 module.exports = {
   labBulkUpsert,
   medBulkUpsert,
+  medSimActBulkUpsert,
 };

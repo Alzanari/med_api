@@ -11,6 +11,11 @@ const MedSchema = new mongoose.Schema(
       required: true,
       index: { unique: true },
     },
+    medId: {
+      type: Number,
+      required: true,
+      index: { unique: true },
+    },
     Distributeur_ou_fabriquant: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Lab",
