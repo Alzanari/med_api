@@ -1,9 +1,29 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
+const axiosRetry = require("axios-retry");
+
+axiosRetry(axios, {
+  retryDelay: (retryCount) => {
+    return retryCount * 1000;
+  },
+  retryCondition(error) {
+    // Conditional check the error status code
+    if (error.response.status >= 400) {
+      return true;
+    } else {
+      return false;
+    }
+  },
+  onRetry: (retryCount, error, requestConfig) => {
+    console.log(`retry num: ${retryCount}, url: ${requestConfig.url}`);
+    return;
+  },
+});
 
 const scapList = async (url) => {
   let List = [];
   let nextPage = url;
+  let pageCharURL = "";
 
   do {
     const html = await axios.get(nextPage);
@@ -19,21 +39,23 @@ const scapList = async (url) => {
     });
 
     const nav = $("nav");
+    const letterUrl = $("div.text-center > div > a.active").next().attr("href");
+    if (letterUrl != void 0) {
+      pageCharURL = letterUrl;
+    }
     if (nav.length) {
       if ($("ul > li.active").next()) {
         nextPage = $("ul > li.active").next().find("a").attr("href");
-      } else {
-        nextPage = null;
       }
     } else {
       nextPage = null;
     }
   } while (nextPage);
 
-  return { List };
+  return { List, pageCharURL };
 };
 
-const scapItem = async (url, type) => {
+const scapLab = async (url) => {
   const html = await axios.get(url);
   const $ = cheerio.load(html.data);
 
@@ -52,18 +74,10 @@ const scapItem = async (url, type) => {
           .each((i, elem) => {
             value.push(elem.children[0].data.split(" ").join(""));
           });
-      } else if (
-        field === "PPV" ||
-        field === "Prix_hospitalier" ||
-        field === "Base_de_remboursement_/_PPV"
-      ) {
-        let intiVal = $(this).find("td.value").text().trim();
-        const numericString = intiVal.replace(" dhs", "");
-        value = parseFloat(numericString);
       } else if (field === "Siteweb") {
         value = $(this).find("td.value > a").attr("href");
       } else {
-        value = $(this).find("td.value").text().trim();
+        value = $(this).find("td.value").text().replace(/\s+/g, " ").trim();
       }
       let obj = { [field]: value };
       item.push(obj);
@@ -71,49 +85,116 @@ const scapItem = async (url, type) => {
 
   res.item = item;
 
-  if (type === "med") {
-    let similarbtn = $(
-      "#wrapper > div.container.main > div.row > div.col-md-9 > div.single.single-medicament > div.text-right.no-print > a:nth-child(2)"
-    ).attr("href");
-    const similarLink = "https://medicament.ma" + similarbtn;
-    const activeSubLink = $(
-      "#wrapper > div.container.main > div.row > div.col-md-9 > div.single.single-medicament > div.text-right.no-print > a:nth-child(3)"
-    ).attr("href");
-    res.similarLink = similarLink;
-    res.activeSubLink = activeSubLink;
-  }
+  return res;
+};
+
+const scapMed = async (url) => {
+  const html = await axios.get(url);
+  const $ = cheerio.load(html.data);
+
+  let item = [];
+  let res = {};
+
+  // scrap table body
+  $("table > tbody")
+    .find("tr")
+    .each(function () {
+      const field = $(this).find("td.field").text().trim().split(" ").join("_");
+      let value = null;
+      if (
+        field === "PPV" ||
+        field === "Prix_hospitalier" ||
+        field === "Base_de_remboursement_/_PPV"
+      ) {
+        let intiVal = $(this).find("td.value").text().trim();
+        const numericString = intiVal.replace(" dhs", "");
+        value = parseFloat(numericString);
+      } else {
+        value = $(this).find("td.value").text().replace(/\s+/g, " ").trim();
+      }
+      let obj = { [field]: value };
+      item.push(obj);
+    });
+
+  res.item = item;
+
+  // get similar meds link
+  let similarbtn = $(
+    "#wrapper > div.container.main > div.row > div.col-md-9 > div.single.single-medicament > div.text-right.no-print > a:nth-child(2)"
+  ).attr("href");
+  const similarLink = "https://medicament.ma" + similarbtn;
+  res.similarLink = similarLink;
+
+  // get Active substance med link
+  const activeSubLink = $(
+    "#wrapper > div.container.main > div.row > div.col-md-9 > div.single.single-medicament > div.text-right.no-print > a:nth-child(3)"
+  ).attr("href");
+  res.activeSubLink = activeSubLink;
+
+  //get med index from similar meds link
+  res["item"].push({
+    medId: parseInt(RegExp(/(?<=&s=).*/gm).exec(similarLink)[0]),
+  });
 
   return res;
 };
 
-const getItems = async (url, type) => {
+const getLabs = async (url) => {
+  let List = [];
+  let nextLetterUrl = "";
+
   let listData = await scapList(url);
+  if (listData.pageCharURL) {
+    nextLetterUrl = listData.pageCharURL;
+  }
   for await (const listItem of listData.List) {
-    let itemData = await scapItem(listItem.link, type);
+    console.log(listItem.link);
+    let itemData = await scapLab(listItem.link);
     Object.entries(itemData.item).forEach(([key, value]) => {
       let prop = Object.keys(value)[0];
       let val = value[prop];
       listItem[prop] = val;
     });
-    if (type === "med") {
+  }
+  List.push(listData.List);
+
+  return List[0];
+};
+
+const getMeds = async (url) => {
+  let List = [];
+  let nextLetterUrl = "";
+  do {
+    let listData = await scapList(url);
+    if (listData.pageCharURL) {
+      nextLetterUrl = listData.pageCharURL;
+    }
+    for await (const listItem of listData.List) {
+      console.log(listItem.link);
+      let itemData = await scapMed(listItem.link);
+      Object.entries(itemData.item).forEach(([key, value]) => {
+        let prop = Object.keys(value)[0];
+        let val = value[prop];
+        listItem[prop] = val;
+      });
       let medSimData = await scapList(itemData.similarLink);
       let medActData = await scapList(itemData.activeSubLink);
       listItem.similar = medSimData.List;
       listItem.activeSubstance = medActData.List;
     }
-  }
-  return listData.List;
+    List.push(listData.List);
+    if (listData.pageCharURL) {
+      nextLetterUrl = listData.pageCharURL;
+      url = nextLetterUrl;
+    } else {
+      break;
+    }
+  } while (nextLetterUrl.length);
+  return List[0];
 };
-/* 
-  Flow of the scrapper
-  1_ get a list of the medicaments and upsert to db
-  2_ iterate over the resulting listing:
-    2a_ go to the medicament's page and get item details
-    2b_ get list of similar/activeSub
-    2c_ find the IDs of similar/activeSub and add it to the medicament's obj
-    2d_ update the medicament in db using the medicament's obj
-*/
 
 module.exports = {
-  getItems,
+  scapList,
+  getLabs,
+  getMeds,
 };

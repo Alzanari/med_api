@@ -23,6 +23,7 @@
   "homepage": "https://github.com/Alzanari/med_api#readme",
   "dependencies": {
     "axios": "^1.4.0",
+    "axios-retry": "^3.8.0",
     "bcrypt": "^5.1.1",
     "cheerio": "^1.0.0-rc.12",
     "cookie-parser": "^1.4.6",
