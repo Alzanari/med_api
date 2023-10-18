@@ -1,8 +1,11 @@
 const mongoose = require("mongoose");
+const { matchedData } = require("express-validator");
 const Med = require("../models/med");
 
 const getAllMeds = async (req, res) => {
-  const { page, limit, orderField, order, ...filters } = req.query;
+  const { page, limit, orderField, order, ...filters } = matchedData(req, {
+    locations: ["query"],
+  });
   const queryPage = page || 1;
   const queryLimit = limit || 10;
   const skip = (queryPage - 1) * queryLimit;
