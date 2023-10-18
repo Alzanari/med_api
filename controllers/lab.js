@@ -2,8 +2,22 @@ const mongoose = require("mongoose");
 const Lab = require("../models/lab");
 
 const getAllLabs = async (req, res) => {
+  const { page, limit, orderField, order, ...filters } = req.query;
+  const queryPage = page || 1;
+  const queryLimit = limit || 10;
+  const skip = (queryPage - 1) * queryLimit;
+
   try {
-    const labs = await Lab.find();
+    const sort = {};
+    if (orderField) {
+      sort[orderField] = order === "desc" ? -1 : 1;
+    }
+
+    const labs = await Lab.find(filters)
+      .sort(sort)
+      .skip(skip)
+      .limit(parseInt(queryLimit))
+      .exec();
     res.json(labs);
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });

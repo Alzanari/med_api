@@ -2,8 +2,22 @@ const mongoose = require("mongoose");
 const User = require("../models/user");
 
 const getAllUsers = async (req, res) => {
+  const { page, limit, orderField, order, ...filters } = req.query;
+  const queryPage = page || 1;
+  const queryLimit = limit || 10;
+  const skip = (queryPage - 1) * queryLimit;
+
   try {
-    const users = await User.find();
+    const sort = {};
+    if (orderField) {
+      sort[orderField] = order === "desc" ? -1 : 1;
+    }
+
+    const users = await User.find(filters)
+      .sort(sort)
+      .skip(skip)
+      .limit(parseInt(queryLimit))
+      .exec();
     res.json(users);
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
