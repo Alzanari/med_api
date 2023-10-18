@@ -16,9 +16,9 @@ async function dbCon() {
 
 // Routing section
 // Apply rate limiting middleware
-
 app.use(apiLimiter);
 
+// rutes config
 const authRouter = require("./routes/auth");
 const labRouter = require("./routes/lab");
 const medRouter = require("./routes/med");

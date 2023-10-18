@@ -13,14 +13,14 @@ const users = [
 dbCon().catch((err) => console.log(err));
 async function dbCon() {
   await mongoose.connect(process.env.MONGODB_LINK, { useNewUrlParser: true });
-  console.log("connected");
+  console.log("connected from users seeder");
 }
 //save your data. this is an async operation
 //after you make sure you seeded all the products, disconnect automatically
 users.map(async (p, index) => {
   await p.save((err, result) => {
     if (index === users.length - 1) {
-      console.log("DONE!");
+      console.log("Done seeding users!");
       mongoose.disconnect();
     }
   });
