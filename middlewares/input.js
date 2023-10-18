@@ -1,6 +1,6 @@
 const { check, validationResult } = require("express-validator");
 
-exports.validateMed = [
+exports.allMed = [
   // Validate 'title' ADD WILDCARD
   check("title")
     .trim()
