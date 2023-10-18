@@ -13,7 +13,6 @@ const MedSchema = new mongoose.Schema(
     },
     medId: {
       type: Number,
-      required: true,
       index: { unique: true },
     },
     Distributeur_ou_fabriquant: {
