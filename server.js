@@ -29,7 +29,7 @@ app.use("/med", medRouter);
 app.use("/user", userRouter);
 
 // Cron jobs section
-// require("./service/cronjob")();
+require("./services/cronjob")();
 
 // run server and listen on PORT
 const PORT = process.env.PORT || 3030;
