@@ -33,7 +33,7 @@ const scapList = async (url) => {
       $(this).find("a > span > span").remove();
       const title = $(this).find("a > span").text().trim();
       List.push({
-        title: title,
+        title: title.toLowerCase(),
         link: link,
       });
     });
@@ -79,7 +79,7 @@ const scapLab = async (url) => {
       } else {
         value = $(this).find("td.value").text().replace(/\s+/g, " ").trim();
       }
-      let obj = { [field]: value };
+      let obj = { [field.toLowerCase()]: value.toLowerCase() };
       item.push(obj);
     });
 
@@ -109,10 +109,16 @@ const scapMed = async (url) => {
         let intiVal = $(this).find("td.value").text().trim();
         const numericString = intiVal.replace(" dhs", "");
         value = parseFloat(numericString);
+      } else if (
+        field === "Lien_du_Produit" ||
+        field === "Boîte" ||
+        field === "Notice_en_français"
+      ) {
+        value = $(this).find("td.value > a").attr("href");
       } else {
         value = $(this).find("td.value").text().replace(/\s+/g, " ").trim();
       }
-      let obj = { [field]: value };
+      let obj = { [field.toLowerCase()]: value.toLowerCase() };
       item.push(obj);
     });
 
