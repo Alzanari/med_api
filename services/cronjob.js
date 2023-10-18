@@ -1,4 +1,4 @@
-var cron = require("node-cron");
+const cron = require("node-cron");
 const fs = require("fs");
 const path = require("path");
 const axios = require("axios");
@@ -17,7 +17,8 @@ module.exports = () => {
     // check the "Dernière mise à jour"/last update in the footer and compare/store it in a json before running the scraper
     const html = await axios.get("https://medicament.ma/");
     const $ = cheerio.load(html.data);
-    let latest = $("footer .meta").text();
+    let latest = $("footer .meta").first().text();
+    let ref = $("footer .meta").last().text();
 
     // read config file with the last update of the db
     const settings = readSettings();
@@ -33,6 +34,7 @@ module.exports = () => {
       await medSimActBulkUpsert(meds);
       let newSettings = {
         updateDate: latest,
+        updateRef: ref,
       };
       saveSettings(newSettings);
     }
