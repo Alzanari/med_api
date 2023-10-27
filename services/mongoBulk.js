@@ -80,8 +80,8 @@ async function medSimActBulkUpsert(medArray) {
   session.startTransaction();
 
   try {
-    // get the updated med list from database
-    let medsInDb = await Med.find({});
+    // get the updated med list (_id and link fields) from database
+    let medsInDb = await Med.find({}).select("link");
     let mapSimAct = [];
     // loop through the med list and get each similar and activeSubstance item it's _id in our database
     medArray.forEach((med) => {
