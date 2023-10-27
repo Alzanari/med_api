@@ -8,7 +8,7 @@ axiosRetry(axios, {
   },
   retryCondition(error) {
     // Conditional check the error status code
-    if (error.response.status >= 400) {
+    if (error.response.status && error.response.status >= 400) {
       return true;
     } else {
       return false;
@@ -26,14 +26,14 @@ const scapList = async (url) => {
   let pageCharURL = "";
 
   do {
-    const html = await axios.get(nextPage);
+    const html = await axios.get(nextPage, { timeout: 3000 });
     const $ = cheerio.load(html.data);
     $("table > tbody > tr").each(function () {
       const link = $(this).find("a").attr("href");
       $(this).find("a > span > span").remove();
       const title = $(this).find("a > span").text().trim();
       List.push({
-        title: title.toLowerCase(),
+        title: title,
         link: link,
       });
     });
@@ -56,7 +56,7 @@ const scapList = async (url) => {
 };
 
 const scapLab = async (url) => {
-  const html = await axios.get(url);
+  const html = await axios.get(url, { timeout: 3000 });
   const $ = cheerio.load(html.data);
 
   let item = [];
@@ -79,7 +79,7 @@ const scapLab = async (url) => {
       } else {
         value = $(this).find("td.value").text().replace(/\s+/g, " ").trim();
       }
-      let obj = { [field.toLowerCase()]: value.toLowerCase() };
+      let obj = { [field]: value };
       item.push(obj);
     });
 
@@ -89,7 +89,7 @@ const scapLab = async (url) => {
 };
 
 const scapMed = async (url) => {
-  const html = await axios.get(url);
+  const html = await axios.get(url, { timeout: 3000 });
   const $ = cheerio.load(html.data);
 
   let item = [];
@@ -118,7 +118,7 @@ const scapMed = async (url) => {
       } else {
         value = $(this).find("td.value").text().replace(/\s+/g, " ").trim();
       }
-      let obj = { [field.toLowerCase()]: value.toLowerCase() };
+      let obj = { [field]: value };
       item.push(obj);
     });
 
@@ -154,17 +154,17 @@ const getLabs = async (url) => {
     nextLetterUrl = listData.pageCharURL;
   }
   for await (const listItem of listData.List) {
-    console.log(listItem.link);
     let itemData = await scapLab(listItem.link);
     Object.entries(itemData.item).forEach(([key, value]) => {
       let prop = Object.keys(value)[0];
       let val = value[prop];
       listItem[prop] = val;
     });
+    console.log(listItem.link);
   }
   List.push(listData.List);
 
-  return List[0];
+  return List.flat();
 };
 
 const getMeds = async (url) => {
@@ -176,7 +176,6 @@ const getMeds = async (url) => {
       nextLetterUrl = listData.pageCharURL;
     }
     for await (const listItem of listData.List) {
-      console.log(listItem.link);
       let itemData = await scapMed(listItem.link);
       Object.entries(itemData.item).forEach(([key, value]) => {
         let prop = Object.keys(value)[0];
@@ -187,6 +186,7 @@ const getMeds = async (url) => {
       let medActData = await scapList(itemData.activeSubLink);
       listItem.similar = medSimData.List;
       listItem.activeSubstance = medActData.List;
+      console.log(listItem.link);
     }
     List.push(listData.List);
     if (listData.pageCharURL) {
@@ -196,7 +196,7 @@ const getMeds = async (url) => {
       break;
     }
   } while (nextLetterUrl.length);
-  return List[0];
+  return List.flat();
 };
 
 module.exports = {
