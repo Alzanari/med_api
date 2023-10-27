@@ -13,7 +13,8 @@ const {
 // cron job is 0 3 * * * which means everyday at 3AM
 
 module.exports = () => {
-  cron.schedule("0 3 * * *", async () => {
+  cron.schedule("49 17 * * *", async () => {
+    console.log("running Cronjob for data scrapping");
     // check the "Dernière mise à jour"/last update in the footer and compare/store it in a json before running the scraper
     const html = await axios.get("https://medicament.ma/");
     const $ = cheerio.load(html.data);
@@ -25,6 +26,7 @@ module.exports = () => {
 
     // if config is empty or config last update is different than current last update, scrap the new data
     if (!settings.updateDate || settings.updateDate != latest) {
+      console.log("new data to fetch");
       let labs = await getLabs("https://medicament.ma/laboratoires/");
       await labBulkUpsert(labs);
       let meds = await getMeds(
@@ -32,6 +34,7 @@ module.exports = () => {
       );
       await medBulkUpsert(meds);
       await medSimActBulkUpsert(meds);
+      console.log("data fetched and upserted");
       let newSettings = {
         updateDate: latest,
         updateRef: ref,
