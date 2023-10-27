@@ -2,25 +2,28 @@ const mongoose = require("mongoose");
 const Lab = require("../models/lab");
 
 const getAllLabs = async (req, res) => {
-  const { page, limit, orderField, order, ...filters } = req.query;
-  const queryPage = page || 1;
-  const queryLimit = limit || 10;
-  const skip = (queryPage - 1) * queryLimit;
+  const result = validationResult(req);
+  if (result.isEmpty()) {
+    const { page, limit, orderField, order } = matchedData(req);
+    const queryPage = page || 1;
+    const queryLimit = limit || 0;
+    const skip = (queryPage - 1) * queryLimit;
 
-  try {
-    const sort = {};
-    if (orderField) {
-      sort[orderField] = order === "desc" ? -1 : 1;
+    try {
+      const sort = {};
+      if (orderField) {
+        sort[orderField] = order === "desc" ? -1 : 1;
+      }
+
+      const labs = await Lab.find()
+        .sort(sort)
+        .skip(skip)
+        .limit(parseInt(queryLimit))
+        .exec();
+      res.json(labs);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
     }
-
-    const labs = await Lab.find(filters)
-      .sort(sort)
-      .skip(skip)
-      .limit(parseInt(queryLimit))
-      .exec();
-    res.json(labs);
-  } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
   }
 };
 

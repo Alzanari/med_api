@@ -6,7 +6,7 @@ const validator = require("../middlewares/input");
 // Define routes using the medController methods
 router
   .route("/")
-  .get(validator.allMed, medController.getAllMeds)
+  .get(validator.allCheck, medController.getAllMeds)
   .post(medController.createMed);
 
 router
