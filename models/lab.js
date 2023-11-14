@@ -12,8 +12,7 @@ const LabSchema = new mongoose.Schema(
       index: { unique: true },
     },
   },
-  { strict: false },
-  { timestamps: true }
+  { strict: false, timestamps: true }
 );
 
 const Lab = mongoose.model("Lab", LabSchema);

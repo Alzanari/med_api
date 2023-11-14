@@ -32,8 +32,7 @@ const MedSchema = new mongoose.Schema(
       },
     ],
   },
-  { strict: false },
-  { timestamps: true }
+  { strict: false, timestamps: true }
 );
 
 MedSchema.virtual(
