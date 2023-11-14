@@ -3,6 +3,7 @@ const cheerio = require("cheerio");
 const axiosRetry = require("axios-retry");
 
 axiosRetry(axios, {
+  shouldResetTimeout: true,
   retryDelay: (retryCount) => {
     return retryCount * 1000;
   },
