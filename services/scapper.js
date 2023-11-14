@@ -7,15 +7,20 @@ axiosRetry(axios, {
     return retryCount * 1000;
   },
   retryCondition(error) {
-    // Conditional check the error status code
-    if (error.response.status && error.response.status >= 400) {
+    // Conditional check the error status cod
+    let status = "response" in error ? error.response.status : 0;
+    if (status >= 400) {
+      return true;
+    } else if (error.code === "ECONNABORTED" || error.code === "ENOTFOUND") {
       return true;
     } else {
       return false;
     }
   },
   onRetry: (retryCount, error, requestConfig) => {
-    console.log(`retry num: ${retryCount}, url: ${requestConfig.url}`);
+    console.log(
+      `retry num: ${retryCount}, error: ${error.name} ${error.code}, url: ${requestConfig.url}`
+    );
     return;
   },
 });
