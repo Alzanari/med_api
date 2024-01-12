@@ -152,13 +152,7 @@ const scapMed = async (url) => {
 };
 
 const getLabs = async (url) => {
-  let List = [];
-  let nextLetterUrl = "";
-
   let listData = await scapList(url);
-  if (listData.pageCharURL) {
-    nextLetterUrl = listData.pageCharURL;
-  }
   for await (const listItem of listData.List) {
     let itemData = await scapLab(listItem.link);
     Object.entries(itemData.item).forEach(([key, value]) => {
@@ -168,9 +162,8 @@ const getLabs = async (url) => {
     });
     console.log(listItem.link);
   }
-  List.push(listData.List);
 
-  return List.flat();
+  return listData.List;
 };
 
 const getMeds = async (url) => {
@@ -188,13 +181,11 @@ const getMeds = async (url) => {
         let val = value[prop];
         listItem[prop] = val;
       });
-      let medSimData = await scapList(itemData.similarLink);
-      let medActData = await scapList(itemData.activeSubLink);
-      listItem.similar = medSimData.List;
-      listItem.activeSubstance = medActData.List;
+      listItem.similar = (await scapList(itemData.similarLink)).List;
+      listItem.activeSubstance = (await scapList(itemData.activeSubLink)).List;
       console.log(listItem.link);
     }
-    List.push(listData.List);
+    List = [...List, ...listData.List];
     if (listData.pageCharURL) {
       nextLetterUrl = listData.pageCharURL;
       url = nextLetterUrl;
@@ -202,7 +193,7 @@ const getMeds = async (url) => {
       break;
     }
   } while (nextLetterUrl.length);
-  return List.flat();
+  return List;
 };
 
 module.exports = {
