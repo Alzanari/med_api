@@ -18,7 +18,15 @@ const getAllUsers = async (req, res) => {
       .skip(skip)
       .limit(parseInt(queryLimit))
       .exec();
-    res.json(users);
+
+    const totalUsers = await User.countDocuments();
+
+    res.json({
+      data: users,
+      page: queryPage,
+      totalPages: queryLimit == 0 ? 1 : Math.ceil(totalUsers / queryLimit),
+      totalUsers: labs.length,
+    });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }

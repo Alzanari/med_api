@@ -20,7 +20,15 @@ const getAllLabs = async (req, res) => {
         .skip(skip)
         .limit(parseInt(queryLimit))
         .exec();
-      res.json(labs);
+
+      const totalLabs = await Lab.countDocuments();
+
+      res.json({
+        data: labs,
+        page: queryPage,
+        totalPages: queryLimit == 0 ? 1 : Math.ceil(totalLabs / queryLimit),
+        totalLabs: labs.length,
+      });
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });
     }
