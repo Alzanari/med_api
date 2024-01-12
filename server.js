@@ -27,11 +27,10 @@ mongoose.connection.on("open", async function () {
   }
 });
 
-// Routing section
 // Apply rate limiting middleware
 app.use(apiLimiter);
 
-// rutes config
+// routes config
 const authRouter = require("./routes/auth");
 const labRouter = require("./routes/lab");
 const medRouter = require("./routes/med");
@@ -42,7 +41,8 @@ app.use("/med", medRouter);
 app.use("/user", userRouter);
 
 // Cron jobs section
-require("./services/cronjob")();
+const cronGetUpdates = require("./services/cronjob");
+cronGetUpdates.start();
 
 // run server and listen on PORT
 const PORT = process.env.PORT || 3030;
