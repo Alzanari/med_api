@@ -1,6 +1,7 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
 const axiosRetry = require("axios-retry");
+const { getType } = require("../utils/types");
 
 axiosRetry(axios, {
   shouldResetTimeout: true,
@@ -26,7 +27,7 @@ axiosRetry(axios, {
   },
 });
 
-const scapList = async (url) => {
+const scrapList = async (url) => {
   let List = [];
   let nextPage = url;
   let pageCharURL = "";
@@ -61,7 +62,7 @@ const scapList = async (url) => {
   return { List, pageCharURL };
 };
 
-const scapLab = async (url) => {
+const scrapLab = async (url) => {
   const html = await axios.get(url, { timeout: 3000 });
   const $ = cheerio.load(html.data);
 
@@ -94,7 +95,7 @@ const scapLab = async (url) => {
   return res;
 };
 
-const scapMed = async (url) => {
+const scrapMed = async (url) => {
   const html = await axios.get(url, { timeout: 3000 });
   const $ = cheerio.load(html.data);
 
@@ -152,9 +153,9 @@ const scapMed = async (url) => {
 };
 
 const getLabs = async (url) => {
-  let listData = await scapList(url);
+  let listData = await scrapList(url);
   for await (const listItem of listData.List) {
-    let itemData = await scapLab(listItem.link);
+    let itemData = await scrapLab(listItem.link);
     Object.entries(itemData.item).forEach(([key, value]) => {
       let prop = Object.keys(value)[0];
       let val = value[prop];
@@ -170,20 +171,18 @@ const getMeds = async (url) => {
   let List = [];
   let nextLetterUrl = "";
   do {
-    let listData = await scapList(url);
-    if (listData.pageCharURL) {
-      nextLetterUrl = listData.pageCharURL;
-    }
+    let listData = await scrapList(url);
     for await (const listItem of listData.List) {
-      let itemData = await scapMed(listItem.link);
+      let itemData = await scrapMed(listItem.link);
       Object.entries(itemData.item).forEach(([key, value]) => {
         let prop = Object.keys(value)[0];
         let val = value[prop];
         listItem[prop] = val;
       });
-      listItem.similar = (await scapList(itemData.similarLink)).List;
-      listItem.activeSubstance = (await scapList(itemData.activeSubLink)).List;
+      listItem.similar = (await scrapList(itemData.similarLink)).List;
+      listItem.activeSubstance = (await scrapList(itemData.activeSubLink)).List;
       console.log(listItem.link);
+      listItem.type = getType(listItem.title);
     }
     List = [...List, ...listData.List];
     if (listData.pageCharURL) {
@@ -197,7 +196,7 @@ const getMeds = async (url) => {
 };
 
 module.exports = {
-  scapList,
+  scrapList,
   getLabs,
   getMeds,
 };
