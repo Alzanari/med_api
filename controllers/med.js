@@ -17,6 +17,18 @@ const getAllMeds = async (req, res) => {
       }
 
       const meds = await Med.find()
+        .populate({
+          path: "Distributeur_ou_fabriquant",
+          select: "title link -_id",
+        })
+        .populate({
+          path: "similar",
+          select: "title link -_id",
+        })
+        .populate({
+          path: "activeSubstance",
+          select: "title link -_id",
+        })
         .sort(sort)
         .skip(skip)
         .limit(parseInt(queryLimit))
