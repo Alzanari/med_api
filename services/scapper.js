@@ -1,7 +1,7 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
 const axiosRetry = require("axios-retry");
-const { getType } = require("../utils/types");
+const { getAttributes } = require("../utils/attributes");
 
 axiosRetry(axios, {
   shouldResetTimeout: true,
@@ -29,68 +29,69 @@ axiosRetry(axios, {
 
 const scrapList = async (url) => {
   let List = [];
-  let nextPage = url;
-  let pageCharURL = "";
+  let page = url;
+  let nextCharURL = "";
 
   do {
-    const html = await axios.get(nextPage, { timeout: 3000 });
+    const html = await axios.get(page, { timeout: 3000 });
     const $ = cheerio.load(html.data);
+
     $("table > tbody > tr").each(function () {
       const link = $(this).find("a").attr("href");
-      $(this).find("a > span > span").remove();
-      const title = $(this).find("a > span").text().trim();
+      const title = $(this).find(".details").contents().first().text().trim();
+
       List.push({
         title: title,
         link: link,
       });
     });
 
-    const nav = $("nav");
     const letterUrl = $("div.text-center > div > a.active").next().attr("href");
-    if (letterUrl != void 0) {
-      pageCharURL = letterUrl;
-    }
-    if (nav.length) {
-      if ($("ul > li.active").next()) {
-        nextPage = $("ul > li.active").next().find("a").attr("href");
-      }
-    } else {
-      nextPage = null;
-    }
-  } while (nextPage);
+    nextCharURL = letterUrl != void 0 ? letterUrl : null;
 
-  return { List, pageCharURL };
+    const nav = $("nav");
+    if (nav.length && $("ul > li.active").next()) {
+      page = $("ul > li.active").next().find("a").attr("href");
+    } else {
+      page = null;
+    }
+  } while (page);
+
+  return { List, nextCharURL };
 };
 
 const scrapLab = async (url) => {
   const html = await axios.get(url, { timeout: 3000 });
   const $ = cheerio.load(html.data);
 
-  let item = [];
   let res = {};
 
-  $("table > tbody")
-    .find("tr")
-    .each(function () {
-      const field = $(this).find("td.field").text().trim().split(" ").join("_");
-      let value = null;
-      if (field === "Téléphone" || field === "Fax") {
+  $("table > tbody > tr").each(function () {
+    const field = $(this).find("td.field").text().trim().split(" ").join("_");
+
+    let value = null;
+    switch (field) {
+      case "Siteweb":
+        value = $(this).find("td.value > a").attr("href");
+        break;
+      case "Fax":
+      case "Tlx":
+      case "Téléphone":
         value = [];
         $(this)
           .find("td.value > a")
           .each((i, elem) => {
             value.push(elem.children[0].data.split(" ").join(""));
           });
-      } else if (field === "Siteweb") {
-        value = $(this).find("td.value > a").attr("href");
-      } else {
-        value = $(this).find("td.value").text().replace(/\s+/g, " ").trim();
-      }
-      let obj = { [field]: value };
-      item.push(obj);
-    });
+        break;
 
-  res.item = item;
+      default:
+        value = $(this).find("td.value").text().replace(/\s+/g, " ").trim();
+        break;
+    }
+
+    res[field.toLowerCase()] = value;
+  });
 
   return res;
 };
@@ -99,68 +100,61 @@ const scrapMed = async (url) => {
   const html = await axios.get(url, { timeout: 3000 });
   const $ = cheerio.load(html.data);
 
-  let item = [];
   let res = {};
 
   // scrap table body
-  $("table > tbody")
-    .find("tr")
-    .each(function () {
-      const field = $(this).find("td.field").text().trim().split(" ").join("_");
-      let value = null;
-      if (
-        field === "PPV" ||
-        field === "Prix_hospitalier" ||
-        field === "Base_de_remboursement_/_PPV"
-      ) {
+  $("table > tbody > tr").each(function () {
+    const field = $(this).find("td.field").text().trim().split(" ").join("_");
+
+    let value = null;
+    switch (field) {
+      case "Base_de_remboursement_/_PPV":
+      case "Prix_hospitalier":
+      case "PPV":
         let intiVal = $(this).find("td.value").text().trim();
         const numericString = intiVal.replace(" dhs", "");
         value = parseFloat(numericString);
-      } else if (
-        field === "Lien_du_Produit" ||
-        field === "Boîte" ||
-        field === "Notice_en_français"
-      ) {
+        break;
+      case "Boîte":
+      case "Lien_du_Produit":
+      case "Notice_en_arabe":
+      case "Notice_en_français":
         value = $(this).find("td.value > a").attr("href");
-      } else {
-        value = $(this).find("td.value").text().replace(/\s+/g, " ").trim();
-      }
-      let obj = { [field]: value };
-      item.push(obj);
-    });
+        break;
 
-  res.item = item;
+      default:
+        value = $(this).find("td.value").text().replace(/\s+/g, " ").trim();
+        break;
+    }
+
+    res[field.toLowerCase()] = value;
+  });
 
   // get similar meds link
   let similarbtn = $(
     "#wrapper > div.container.main > div.row > div.col-md-9 > div.single.single-medicament > div.text-right.no-print > a:nth-child(2)"
   ).attr("href");
   const similarLink = "https://medicament.ma" + similarbtn;
-  res.similarLink = similarLink;
+  res.similar = similarLink;
 
   // get Active substance med link
   const activeSubLink = $(
     "#wrapper > div.container.main > div.row > div.col-md-9 > div.single.single-medicament > div.text-right.no-print > a:nth-child(3)"
   ).attr("href");
-  res.activeSubLink = activeSubLink;
+  res.activeSubstance = activeSubLink;
 
   //get med index from similar meds link
-  res["item"].push({
-    medId: parseInt(RegExp(/(?<=&s=).*/gm).exec(similarLink)[0]),
-  });
+  res["medId"] = parseInt(RegExp(/(?<=&s=).*/gm).exec(similarLink)[0]);
 
   return res;
 };
 
 const getLabs = async (url) => {
   let listData = await scrapList(url);
+
   for await (const listItem of listData.List) {
-    let itemData = await scrapLab(listItem.link);
-    Object.entries(itemData.item).forEach(([key, value]) => {
-      let prop = Object.keys(value)[0];
-      let val = value[prop];
-      listItem[prop] = val;
-    });
+    let labData = await scrapLab(listItem.link);
+    Object.assign(listItem, labData);
     console.log(listItem.link);
   }
 
@@ -170,21 +164,26 @@ const getLabs = async (url) => {
 const getMeds = async (url) => {
   let List = [];
   let nextLetterUrl = "";
+
   do {
     let listData = await scrapList(url);
     for await (const listItem of listData.List) {
-      let itemData = await scrapMed(listItem.link);
-      Object.entries(itemData.item).forEach(([key, value]) => {
-        let prop = Object.keys(value)[0];
-        let val = value[prop];
-        listItem[prop] = val;
-      });
-      listItem.similar = (await scrapList(itemData.similarLink)).List;
-      listItem.activeSubstance = (await scrapList(itemData.activeSubLink)).List;
+      let medData = await scrapMed(listItem.link);
+      Object.assign(listItem, medData);
+
+      listItem.similar = (await scrapList(listItem.similar)).List;
+      listItem.activeSubstance = (
+        await scrapList(listItem.activeSubstance)
+      ).List;
       console.log(listItem.link);
-      listItem.type = getType(listItem.title);
+
+      let attributeArray = getAttributes(listItem.title);
+      listItem.title = attributeArray[0];
+      listItem.form = attributeArray[1];
+      listItem.type = attributeArray[2];
     }
     List = [...List, ...listData.List];
+
     if (listData.pageCharURL) {
       nextLetterUrl = listData.pageCharURL;
       url = nextLetterUrl;
@@ -197,6 +196,8 @@ const getMeds = async (url) => {
 
 module.exports = {
   scrapList,
+  scrapLab,
+  scrapMed,
   getLabs,
   getMeds,
 };
