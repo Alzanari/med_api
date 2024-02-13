@@ -57,21 +57,6 @@ app.use("/v1/users", userRouter);
 const cronGetUpdates = require("./services/cron.service");
 cronGetUpdates.start();
 
-// const {
-//   getLabs,
-//   getMeds,
-//   scrapList,
-//   scrapLab,
-//   scrapMed,
-// } = require("./services/scrap.service");
-// let x = async () => {
-//   let test = await getMeds(
-//     "https://medicament.ma/listing-des-medicaments/page/8/?lettre=Z"
-//   );
-//   console.log(test);
-// };
-// x();
-
 // run server and listen on PORT
 const PORT = process.env.PORT || 3030;
 app.listen(PORT, () => {
