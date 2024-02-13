@@ -5,6 +5,7 @@ const LabSchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
+      index: { unique: true },
     },
     link: {
       type: String,
