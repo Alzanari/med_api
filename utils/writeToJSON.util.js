@@ -6,7 +6,7 @@ const readSettings = (path) => {
     const data = fs.readFileSync(path, "utf8");
     return JSON.parse(data);
   } catch (error) {
-    winston.error("Error reading settings:", error);
+    winston.error(`Error reading settings: ${error}`);
     return null;
   }
 };
