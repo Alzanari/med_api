@@ -44,13 +44,38 @@ const findType = (str) => {
   return firstWord;
 };
 
-const getType = (str) => {
-  str = str.charAt(str.length - 1) == "," ? str.slice(0, -1) : str;
-  let commaRight =
-    str.indexOf(",") >= 0 ? str.split(/\,(?=[^\,]+$)/)[1].trim() : "";
-  let type = findType(commaRight);
+const getAttributes = (str) => {
+  try {
+    let strSplit = str.indexOf(",") >= 0 ? str.split(/\,(?=[^\,]+$)/) : "";
 
-  return type;
+    if (!strSplit) {
+      return [str, "", ""];
+    }
+
+    let title = strSplit ? strSplit[0] : str;
+    let form = strSplit[1].trim();
+    let type = findType(form);
+    return [title, form, type];
+  } catch (error) {
+    switch (error.name) {
+      case "TypeError":
+        str = str.charAt(str.length - 1) == "," ? str.slice(0, -1) : str;
+        let strSplit = str.indexOf(",") >= 0 ? str.split(/\,(?=[^\,]+$)/) : "";
+
+        if (!strSplit) {
+          return [str, "", ""];
+        }
+
+        let title = strSplit ? strSplit[0] : str;
+        let form = strSplit[1].trim();
+        let type = findType(form);
+        return [title, form, type];
+        break;
+      default:
+        console.log(error);
+        break;
+    }
+  }
 };
 
-module.exports = { getType };
+module.exports = { getAttributes };
