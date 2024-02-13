@@ -11,7 +11,12 @@ const {
 const { readSettings, saveSettings } = require("../utils/writeToJSON.util");
 
 // path to json config file
-const settingsFilePath = path.join(__dirname, "..", "config", "settings.json");
+const settingsFilePath = path.join(
+  __dirname,
+  "..",
+  "config",
+  "cronRef.config.json"
+);
 
 // cron job is 0 3 * * * which means everyday at 3AM
 const getUpdates = cron.schedule("0 3 * * *", async () => {
