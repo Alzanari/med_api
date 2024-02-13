@@ -10,8 +10,8 @@ const app = express();
 app.use(express.json());
 
 // error handling for uncaught and unhandled
-process.on("uncaughtException", (err) => {
-  winston.error("Uncaught Exception:", err.message);
+process.on("uncaughtException", (error) => {
+  winston.error("Uncaught Exception:", error.message);
   // Perform cleanup tasks if needed
   process.exit(1);
 });
