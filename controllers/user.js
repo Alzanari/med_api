@@ -1,5 +1,11 @@
-const mongoose = require("mongoose");
-const User = require("../models/user");
+const {
+  allUsers,
+  userCount,
+  userByEmail,
+  insertUser,
+  updateUser,
+  deleteUser,
+} = require("../services/userService");
 
 const getAllUsers = async (req, res) => {
   const { page, limit, orderField, order, ...filters } = req.query;
@@ -13,13 +19,9 @@ const getAllUsers = async (req, res) => {
       sort[orderField] = order === "desc" ? -1 : 1;
     }
 
-    const users = await User.find(filters)
-      .sort(sort)
-      .skip(skip)
-      .limit(parseInt(queryLimit))
-      .exec();
+    const users = await allUsers(sort, skip, queryLimit);
 
-    const totalUsers = await User.countDocuments();
+    const totalUsers = await userCount();
 
     res.json({
       data: users,
@@ -35,18 +37,17 @@ const getAllUsers = async (req, res) => {
 const createUser = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const newUser = new User({ email, password });
-    const savedUser = await newUser.save();
+    const savedUser = await insertUser(email, password);
     res.status(201).json(savedUser);
   } catch (error) {
     res.status(400).json({ error: "Bad request" });
   }
 };
 
-const getUserById = async (req, res) => {
-  const userId = req.params.id;
+const getUserByEmail = async (req, res) => {
+  const userEmail = req.params.email;
   try {
-    const user = await User.findById(userId);
+    const user = await userByEmail(userEmail);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -56,15 +57,11 @@ const getUserById = async (req, res) => {
   }
 };
 
-const updateUserById = async (req, res) => {
-  const userId = req.params.id;
+const updateUserByEmail = async (req, res) => {
+  const userEmail = req.params.email;
   const { email, password } = req.body;
   try {
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { $set: { email, password } },
-      { new: true }
-    );
+    const updatedUser = await updateUser(userEmail, { email, password });
     if (!updatedUser) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -74,10 +71,10 @@ const updateUserById = async (req, res) => {
   }
 };
 
-const deleteUserById = async (req, res) => {
-  const userId = req.params.id;
+const deleteUserByEmail = async (req, res) => {
+  const userEmail = req.params.email;
   try {
-    const deletedUser = await User.findByIdAndRemove(userId);
+    const deletedUser = await deleteUser(userEmail);
     if (!deletedUser) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -90,7 +87,7 @@ const deleteUserById = async (req, res) => {
 module.exports = {
   getAllUsers,
   createUser,
-  getUserById,
-  updateUserById,
-  deleteUserById,
+  getUserByEmail,
+  updateUserByEmail,
+  deleteUserByEmail,
 };

@@ -1,5 +1,9 @@
-const mongoose = require("mongoose");
-const User = require("../models/user");
+const {
+  userByEmail,
+  userByRefreshToken,
+  insertUser,
+  updateUserRefreshToken,
+} = require("../services/userService");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -8,15 +12,14 @@ const register = async (req, res) => {
     const { email, password } = req.body;
 
     // Check if email already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await userByEmail(email);
     if (existingUser) {
       return res.status(400).json({ message: "Email already exists" });
     }
 
     // Create a new user
     const hash = await bcrypt.hash(password, process.env.SALT);
-    const newUser = new User({ email, hash });
-    await newUser.save();
+    await insertUser(email, hash);
 
     res.json({ message: "User registered successfully" });
   } catch (error) {
@@ -27,7 +30,7 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const user = await userByEmail(email);
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ error: "Authentication failed" });
     }
@@ -38,8 +41,7 @@ const login = async (req, res) => {
     const refreshToken = jwt.sign({ email }, process.env.REFRESH_SECRET_KEY);
 
     // Store the refresh token in the database
-    user.refreshToken = refreshToken;
-    await user.save();
+    await updateUser(email, { refreshToken });
 
     // Set the token and refresh token as a cookie
     res.cookie("refreshToken", refreshToken, { httpOnly: true });
@@ -55,10 +57,7 @@ const logout = async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
 
     // Remove the refresh token from the database
-    await User.findOneAndUpdate(
-      { refreshToken: refreshToken },
-      { refreshToken: null }
-    );
+    await updateUserRefreshToken(refreshToken);
 
     // Clear the token and refresh token cookie
     res.clearCookie("refreshToken");
@@ -76,7 +75,7 @@ const refreshToken = async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ refreshToken });
+    const user = await userByRefreshToken(refreshToken);
     if (!user) {
       return res.status(401).json({ error: "Invalid refresh token" });
     }

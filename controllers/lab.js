@@ -1,5 +1,11 @@
-const mongoose = require("mongoose");
-const Lab = require("../models/lab");
+const {
+  allLabs,
+  labCount,
+  labByTitle,
+  insertLab,
+  updateLab,
+  deleteLab,
+} = require("../services/labService");
 
 const getAllLabs = async (req, res) => {
   const result = validationResult(req);
@@ -15,13 +21,9 @@ const getAllLabs = async (req, res) => {
         sort[orderField] = order === "desc" ? -1 : 1;
       }
 
-      const labs = await Lab.find()
-        .sort(sort)
-        .skip(skip)
-        .limit(parseInt(queryLimit))
-        .exec();
+      const labs = await allLabs(sort, skip, queryLimit);
 
-      const totalLabs = await Lab.countDocuments();
+      const totalLabs = await labCount();
 
       res.json({
         data: labs,
@@ -38,18 +40,17 @@ const getAllLabs = async (req, res) => {
 const createLab = async (req, res) => {
   const { title, link } = req.body;
   try {
-    const newLab = new Lab({ title, link });
-    const savedLab = await newLab.save();
+    const savedLab = await insertLab(title, link);
     res.status(201).json(savedLab);
   } catch (error) {
     res.status(400).json({ error: "Bad request" });
   }
 };
 
-const getLabById = async (req, res) => {
+const getLabByTitle = async (req, res) => {
   const labId = req.params.id;
   try {
-    const lab = await Lab.findById(labId);
+    const lab = await labByTitle(labId);
     if (!lab) {
       return res.status(404).json({ error: "Lab not found" });
     }
@@ -59,14 +60,10 @@ const getLabById = async (req, res) => {
   }
 };
 
-const updateLabById = async (req, res) => {
+const updateLabByTitle = async (req, res) => {
   const labId = req.params.id;
   try {
-    const updatedLab = await Lab.findByIdAndUpdate(
-      labId,
-      { $set: req.body },
-      { new: true }
-    );
+    const updatedLab = await updateLab(labId, req.body);
     if (!updatedLab) {
       return res.status(404).json({ error: "Lab not found" });
     }
@@ -76,10 +73,10 @@ const updateLabById = async (req, res) => {
   }
 };
 
-const deleteLabById = async (req, res) => {
+const deleteLabByTitle = async (req, res) => {
   const labId = req.params.id;
   try {
-    const deletedLab = await Lab.findByIdAndRemove(labId);
+    const deletedLab = await deleteLab(labId);
     if (!deletedLab) {
       return res.status(404).json({ error: "Lab not found" });
     }
@@ -91,8 +88,8 @@ const deleteLabById = async (req, res) => {
 
 module.exports = {
   getAllLabs,
-  getLabById,
+  getLabByTitle,
   createLab,
-  updateLabById,
-  deleteLabById,
+  updateLabByTitle,
+  deleteLabByTitle,
 };

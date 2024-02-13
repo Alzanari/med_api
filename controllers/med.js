@@ -1,6 +1,12 @@
-const mongoose = require("mongoose");
 const { matchedData } = require("express-validator");
-const Med = require("../models/med");
+const {
+  allMeds,
+  medCount,
+  medByMedid,
+  insertMed,
+  updateMed,
+  deleteMed,
+} = require("../services/medService");
 
 const getAllMeds = async (req, res) => {
   const result = validationResult(req);
@@ -16,25 +22,9 @@ const getAllMeds = async (req, res) => {
         sort[orderField] = order === "desc" ? -1 : 1;
       }
 
-      const meds = await Med.find()
-        .populate({
-          path: "Distributeur_ou_fabriquant",
-          select: "title link -_id",
-        })
-        .populate({
-          path: "similar",
-          select: "title link -_id",
-        })
-        .populate({
-          path: "activeSubstance",
-          select: "title link -_id",
-        })
-        .sort(sort)
-        .skip(skip)
-        .limit(parseInt(queryLimit))
-        .exec();
+      const meds = await allMeds(sort, skip, queryLimit);
 
-      const totalMeds = await Med.countDocuments();
+      const totalMeds = await medCount();
 
       res.json({
         data: meds,
@@ -51,8 +41,7 @@ const getAllMeds = async (req, res) => {
 const createMed = async (req, res) => {
   const { title, link } = req.body;
   try {
-    const newMed = new Med({ title, link });
-    const savedMed = await newMed.save();
+    const savedMed = await insertMed(title, link);
     res.status(201).json(savedMed);
   } catch (error) {
     res.status(400).json({ error: "Bad request" });
@@ -62,7 +51,7 @@ const createMed = async (req, res) => {
 const getMedById = async (req, res) => {
   const medId = req.params.id;
   try {
-    const med = await Med.findById(medId);
+    const med = await medByMedid(medId);
     if (!med) {
       return res.status(404).json({ error: "Med not found" });
     }
@@ -75,11 +64,7 @@ const getMedById = async (req, res) => {
 const updateMedById = async (req, res) => {
   const medId = req.params.id;
   try {
-    const updatedMed = await Med.findByIdAndUpdate(
-      medId,
-      { $set: req.body },
-      { new: true }
-    );
+    const updatedMed = await updateMed(medId, req.body);
     if (!updatedMed) {
       return res.status(404).json({ error: "Med not found" });
     }
@@ -92,7 +77,7 @@ const updateMedById = async (req, res) => {
 const deleteMedById = async (req, res) => {
   const medId = req.params.id;
   try {
-    const deletedMed = await Med.findByIdAndRemove(medId);
+    const deletedMed = await deleteMed(medId);
     if (!deletedMed) {
       return res.status(404).json({ error: "Med not found" });
     }
