@@ -1,4 +1,5 @@
 const User = require("../models/user.model");
+const winston = require("../config/winston.config");
 
 const allUsers = async (sort, skip, queryLimit) => {
   try {
@@ -7,40 +8,40 @@ const allUsers = async (sort, skip, queryLimit) => {
       .skip(skip)
       .limit(parseInt(queryLimit))
       .exec();
-    console.log("Found users:", result);
+    winston.info("Found users:", result);
     return result;
   } catch (error) {
-    console.error("Error finding users:", error);
+    winston.error("Error finding users:", error);
   }
 };
 
 const userCount = async () => {
   try {
     const result = await User.countDocuments();
-    console.log("Total users:", result);
+    winston.info("Total users:", result);
     return result;
   } catch (error) {
-    console.error("Error counnting users:", error);
+    winston.error("Error counnting users:", error);
   }
 };
 
 const userByEmail = async (email) => {
   try {
     const result = await User.findOne({ email });
-    console.log("Found user:", result);
+    winston.info("Found user:", result);
     return result;
   } catch (error) {
-    console.error("Error finding user:", error);
+    winston.error("Error finding user:", error);
   }
 };
 
 const userByRefreshToken = async (refreshToken) => {
   try {
     const result = await User.findOne({ refreshToken });
-    console.log("Found user:", result);
+    winston.info("Found user:", result);
     return result;
   } catch (error) {
-    console.error("Error finding user:", error);
+    winston.error("Error finding user:", error);
   }
 };
 
@@ -48,10 +49,10 @@ const insertUser = async (email, password) => {
   try {
     const newUser = new User({ email, password });
     const result = await newUser.save();
-    console.log("Inserted user:", result);
+    winston.info("Inserted user:", result);
     return result;
   } catch (error) {
-    console.error("Error inserting user:", error);
+    winston.error("Error inserting user:", error);
   }
 };
 
@@ -62,10 +63,10 @@ const updateUser = async (email, userData) => {
       { $set: userData },
       { new: true }
     );
-    console.log("Updated user:", result);
+    winston.info("Updated user:", result);
     return result;
   } catch (error) {
-    console.error("Error updating user:", error);
+    winston.error("Error updating user:", error);
   }
 };
 
@@ -75,20 +76,20 @@ const updateUserRefreshToken = async (refreshToken) => {
       { refreshToken },
       { refreshToken: null }
     );
-    console.log("Updated user:", result);
+    winston.info("Updated user:", result);
     return result;
   } catch (error) {
-    console.error("Error updating user:", error);
+    winston.error("Error updating user:", error);
   }
 };
 
 const deleteUser = async (email) => {
   try {
     const result = await User.findOneAndDelete({ email });
-    console.log("Removed user:", result);
+    winston.info("Removed user:", result);
     return result;
   } catch (error) {
-    console.error("Error removing user:", error);
+    winston.error("Error removing user:", error);
   }
 };
 

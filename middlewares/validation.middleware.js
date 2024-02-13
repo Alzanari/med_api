@@ -1,4 +1,5 @@
 const { param, validationResult } = require("express-validator");
+const winston = require("../config/winston.config");
 
 exports.allCheck = [
   // Validate 'limit' (optional)
@@ -15,8 +16,11 @@ exports.allCheck = [
   param("order").optional().isString().isIn(["asc", "desc"]),
   (req, res, next) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty())
-      return res.status(422).json({ errors: errors.array() });
+    if (!errors.isEmpty()) {
+      const notFoundError = new Error(errors.array());
+      winston.error(notFoundError.message);
+      return res.status(4222).json({ error: errors.array() });
+    }
     next();
   },
 ];

@@ -1,3 +1,4 @@
+const { matchedData } = require("express-validator");
 const {
   allLabs,
   labCount,
@@ -6,6 +7,7 @@ const {
   updateLab,
   deleteLab,
 } = require("../services/lab.service");
+const winston = require("../config/winston.config");
 
 const getAllLabs = async (req, res) => {
   const result = validationResult(req);
@@ -32,6 +34,7 @@ const getAllLabs = async (req, res) => {
         totalLabs: labs.length,
       });
     } catch (error) {
+      winston.error(error.message);
       res.status(500).json({ error: "Internal server error" });
     }
   }
@@ -43,7 +46,8 @@ const createLab = async (req, res) => {
     const savedLab = await insertLab(title, link);
     res.status(201).json(savedLab);
   } catch (error) {
-    res.status(400).json({ error: "Bad request" });
+    winston.error(error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -52,10 +56,13 @@ const getLabByTitle = async (req, res) => {
   try {
     const lab = await labByTitle(labTitle);
     if (!lab) {
-      return res.status(404).json({ error: "Lab not found" });
+      const notFoundError = new Error("Lab not found");
+      winston.error(notFoundError.message);
+      return res.status(404).json({ error: notFoundError.message });
     }
     res.json(lab);
   } catch (error) {
+    winston.error(error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -65,11 +72,14 @@ const updateLabByTitle = async (req, res) => {
   try {
     const updatedLab = await updateLab(labTitle, req.body);
     if (!updatedLab) {
-      return res.status(404).json({ error: "Lab not found" });
+      const notFoundError = new Error("Lab not found");
+      winston.error(notFoundError.message);
+      return res.status(404).json({ error: notFoundError.message });
     }
     res.json(updatedLab);
   } catch (error) {
-    res.status(400).json({ error: "Bad request" });
+    winston.error(error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -78,10 +88,13 @@ const deleteLabByTitle = async (req, res) => {
   try {
     const deletedLab = await deleteLab(labTitle);
     if (!deletedLab) {
-      return res.status(404).json({ error: "Lab not found" });
+      const notFoundError = new Error("Lab not found");
+      winston.error(notFoundError.message);
+      return res.status(404).json({ error: notFoundError.message });
     }
     res.json({ message: "Lab deleted" });
   } catch (error) {
+    winston.error(error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };

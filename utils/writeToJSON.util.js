@@ -1,22 +1,23 @@
 const fs = require("fs");
+const winston = require("../config/winston.config");
 
 const readSettings = (path) => {
   try {
     const data = fs.readFileSync(path, "utf8");
     return JSON.parse(data);
   } catch (error) {
-    console.error("Error reading settings:", error);
+    winston.error("Error reading settings:", error);
     return null;
   }
 };
 
-const saveSettings = (path, newSettings) => {
+const saveSettings = (path, data) => {
   try {
-    const jsonData = JSON.stringify(newSettings, null, 2);
+    const jsonData = JSON.stringify(data, null, 2);
     fs.writeFileSync(path, jsonData, "utf8");
-    console.log("Settings saved successfully.");
+    winston.info("JSON saved successfully to: ", path);
   } catch (error) {
-    console.error("Error saving settings:", error);
+    winston.error("Error saving settings:", error);
   }
 };
 

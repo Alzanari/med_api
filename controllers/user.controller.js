@@ -6,9 +6,10 @@ const {
   updateUser,
   deleteUser,
 } = require("../services/user.service");
+const winston = require("../config/winston.config");
 
 const getAllUsers = async (req, res) => {
-  const { page, limit, orderField, order, ...filters } = req.query;
+  const { page, limit, orderField, order } = req.query;
   const queryPage = page || 1;
   const queryLimit = limit || 10;
   const skip = (queryPage - 1) * queryLimit;
@@ -30,6 +31,7 @@ const getAllUsers = async (req, res) => {
       totalUsers: labs.length,
     });
   } catch (error) {
+    winston.error(error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -40,7 +42,8 @@ const createUser = async (req, res) => {
     const savedUser = await insertUser(email, password);
     res.status(201).json(savedUser);
   } catch (error) {
-    res.status(400).json({ error: "Bad request" });
+    winston.error(error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -49,10 +52,13 @@ const getUserByEmail = async (req, res) => {
   try {
     const user = await userByEmail(userEmail);
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      const notFoundError = new Error("User not found");
+      winston.error(notFoundError.message);
+      return res.status(404).json({ error: notFoundError.message });
     }
     res.json(user);
   } catch (error) {
+    winston.error(error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -63,11 +69,14 @@ const updateUserByEmail = async (req, res) => {
   try {
     const updatedUser = await updateUser(userEmail, { email, password });
     if (!updatedUser) {
-      return res.status(404).json({ error: "User not found" });
+      const notFoundError = new Error("User not found");
+      winston.error(notFoundError.message);
+      return res.status(404).json({ error: notFoundError.message });
     }
     res.json(updatedUser);
   } catch (error) {
-    res.status(400).json({ error: "Bad request" });
+    winston.error(error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -76,10 +85,13 @@ const deleteUserByEmail = async (req, res) => {
   try {
     const deletedUser = await deleteUser(userEmail);
     if (!deletedUser) {
-      return res.status(404).json({ error: "User not found" });
+      const notFoundError = new Error("User not found");
+      winston.error(notFoundError.message);
+      return res.status(404).json({ error: notFoundError.message });
     }
     res.json({ message: "User deleted" });
   } catch (error) {
+    winston.error(error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };

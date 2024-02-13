@@ -2,6 +2,7 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 const axiosRetry = require("axios-retry");
 const { getAttributes } = require("../utils/attribute.util");
+const winston = require("../config/winston.config");
 
 axiosRetry(axios, {
   shouldResetTimeout: true,
@@ -20,7 +21,7 @@ axiosRetry(axios, {
     }
   },
   onRetry: (retryCount, error, requestConfig) => {
-    console.log(
+    winston.warn(
       `retry num: ${retryCount}, error: ${error.name} ${error.code}, url: ${requestConfig.url}`
     );
     return;

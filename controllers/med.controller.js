@@ -7,6 +7,7 @@ const {
   updateMed,
   deleteMed,
 } = require("../services/med.service");
+const winston = require("../config/winston.config");
 
 const getAllMeds = async (req, res) => {
   const result = validationResult(req);
@@ -33,6 +34,7 @@ const getAllMeds = async (req, res) => {
         totalMeds: labs.length,
       });
     } catch (error) {
+      winston.error(error.message);
       res.status(500).json({ error: "Internal server error" });
     }
   }
@@ -44,7 +46,8 @@ const createMed = async (req, res) => {
     const savedMed = await insertMed(title, link);
     res.status(201).json(savedMed);
   } catch (error) {
-    res.status(400).json({ error: "Bad request" });
+    winston.error(error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -53,10 +56,13 @@ const getMedByMedId = async (req, res) => {
   try {
     const med = await medByMedid(medId);
     if (!med) {
-      return res.status(404).json({ error: "Med not found" });
+      const notFoundError = new Error("Med not found");
+      winston.error(notFoundError.message);
+      return res.status(404).json({ error: notFoundError.message });
     }
     res.json(med);
   } catch (error) {
+    winston.error(error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -66,11 +72,14 @@ const updateMedByMedId = async (req, res) => {
   try {
     const updatedMed = await updateMed(medId, req.body);
     if (!updatedMed) {
-      return res.status(404).json({ error: "Med not found" });
+      const notFoundError = new Error("Med not found");
+      winston.error(notFoundError.message);
+      return res.status(404).json({ error: notFoundError.message });
     }
     res.json(updatedMed);
   } catch (error) {
-    res.status(400).json({ error: "Bad request" });
+    winston.error(error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -79,10 +88,13 @@ const deleteMedByMedId = async (req, res) => {
   try {
     const deletedMed = await deleteMed(medId);
     if (!deletedMed) {
-      return res.status(404).json({ error: "Med not found" });
+      const notFoundError = new Error("Med not found");
+      winston.error(notFoundError.message);
+      return res.status(404).json({ error: notFoundError.message });
     }
     res.json({ message: "Med deleted" });
   } catch (error) {
+    winston.error(error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };

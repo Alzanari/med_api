@@ -6,6 +6,7 @@ const {
 } = require("../services/user.service");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const winston = require("../config/winston.config");
 
 const register = async (req, res) => {
   try {
@@ -14,7 +15,9 @@ const register = async (req, res) => {
     // Check if email already exists
     const existingUser = await userByEmail(email);
     if (existingUser) {
-      return res.status(400).json({ message: "Email already exists" });
+      const notFoundError = new Error("Email already exists");
+      winston.error(notFoundError.message);
+      return res.status(400).json({ error: notFoundError.message });
     }
 
     // Create a new user
@@ -23,6 +26,7 @@ const register = async (req, res) => {
 
     res.json({ message: "User registered successfully" });
   } catch (error) {
+    winston.error(error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -32,7 +36,9 @@ const login = async (req, res) => {
     const { email, password } = req.body;
     const user = await userByEmail(email);
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ error: "Authentication failed" });
+      const notFoundError = new Error("Authentication failed");
+      winston.error(notFoundError.message);
+      return res.status(401).json({ error: notFoundError.message });
     }
 
     const token = jwt.sign({ email }, process.env.SECRET_KEY, {
@@ -48,6 +54,7 @@ const login = async (req, res) => {
     res.cookie("jwtToken", token, { httpOnly: true });
     res.status(200).json({ message: "Authentication successful" });
   } catch (error) {
+    winston.error(error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -64,6 +71,7 @@ const logout = async (req, res) => {
     res.clearCookie("jwtToken");
     res.status(200).json({ message: "Logged out" });
   } catch (error) {
+    winston.error(error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -71,18 +79,24 @@ const logout = async (req, res) => {
 const refreshToken = async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
   if (!refreshToken) {
-    return res.status(401).json({ error: "Refresh token not provided" });
+    const notFoundError = new Error("Refresh token not provided");
+    winston.error(notFoundError.message);
+    return res.status(401).json({ error: notFoundError.message });
   }
 
   try {
     const user = await userByRefreshToken(refreshToken);
     if (!user) {
-      return res.status(401).json({ error: "Invalid refresh token" });
+      const notFoundError = new Error("Invalid refresh token");
+      winston.error(notFoundError.message);
+      return res.status(401).json({ error: notFoundError.message });
     }
 
     jwt.verify(refreshToken, process.env.REFRESH_SECRET_KEY, (err, decoded) => {
       if (err) {
-        return res.status(401).json({ error: "Invalid refresh token" });
+        const notFoundError = new Error("Invalid refresh token");
+        winston.error(notFoundError.message);
+        return res.status(401).json({ error: notFoundError.message });
       }
 
       // Generate a new access token
@@ -97,6 +111,7 @@ const refreshToken = async (req, res) => {
       res.status(200).json({ message: "New token sent successfully" });
     });
   } catch (error) {
+    winston.error(error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };

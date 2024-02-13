@@ -1,14 +1,19 @@
 const jwt = require("jsonwebtoken");
 const { body, validationResult } = require("express-validator");
+const winston = require("../config/winston.config");
 
 function authenticateToken(req, res, next) {
   const token = req.header("Authorization");
   if (!token) {
-    return res.status(401).json({ error: "Authorization token not provided" });
+    const notFoundError = new Error("uthorization token not provided");
+    winston.error(notFoundError.message);
+    return res.status(401).json({ error: notFoundError.message });
   }
   jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
     if (err) {
-      return res.status(401).json({ error: "Invalid token" });
+      const notFoundError = new Error("Invalid token");
+      winston.error(notFoundError.message);
+      return res.status(401).json({ error: notFoundError.message });
     }
     req.user = decoded;
     next();
@@ -25,7 +30,9 @@ const loginBodyRules = [
 const checkRules = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    const notFoundError = new Error(errors.array());
+    winston.error(notFoundError.message);
+    return res.status(401).json({ error: errors.array() });
   }
   next();
 };

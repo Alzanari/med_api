@@ -3,16 +3,32 @@ const User = require("./models/user.model");
 require("dotenv").config();
 const mongoose = require("mongoose");
 const { apiLimiter } = require("./middlewares/rateLimit.middleware");
+const winston = require("./config/winston.config");
 
 const app = express();
 
 app.use(express.json());
 
+// error handling for uncaught and unhandled
+process.on("uncaughtException", (err) => {
+  winston.error("Uncaught Exception:", err.message);
+  // Perform cleanup tasks if needed
+  process.exit(1);
+});
+process.on("unhandledRejection", (reason, promise) => {
+  winston.error("Unhandled Rejection at:", promise, "reason:", reason.message);
+  // Perform cleanup tasks if needed
+  process.exit(1);
+});
+
+// Apply rate limiting middleware
+app.use(apiLimiter);
+
 // Database section
 dbCon().catch((err) => console.log(err));
 async function dbCon() {
   await mongoose.connect(process.env.MONGODB_LINK);
-  console.log("connected");
+  winston.info("connected to mongodb");
 }
 
 // add first user
@@ -26,9 +42,6 @@ mongoose.connection.on("open", async function () {
     }).save();
   }
 });
-
-// Apply rate limiting middleware
-app.use(apiLimiter);
 
 // routes config
 const authRouter = require("./routes/auth.route");
@@ -62,5 +75,5 @@ cronGetUpdates.start();
 // run server and listen on PORT
 const PORT = process.env.PORT || 3030;
 app.listen(PORT, () => {
-  console.log(`server is live on port ${PORT}`);
+  winston.info(`server is live on port ${PORT}`);
 });

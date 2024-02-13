@@ -1,3 +1,5 @@
+const winston = require("../config/winston.config");
+
 const findType = (str) => {
   let typeRejects = [
     "enfants",
@@ -72,7 +74,7 @@ const getAttributes = (str) => {
         return [title, form, type];
         break;
       default:
-        console.log(error);
+        winston.error(error.message);
         break;
     }
   }

@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Lab = require("../models/lab.model");
 const Med = require("../models/med.model");
+const winston = require("../config/winston.config");
 
 async function labBulkUpsert(labArray) {
   const session = await mongoose.startSession();
@@ -22,7 +23,7 @@ async function labBulkUpsert(labArray) {
 
     await session.commitTransaction();
   } catch (error) {
-    console.error("Error performing lab bulk :", error);
+    winston.error("Error performing lab bulk:", error);
     await session.abortTransaction();
   } finally {
     session.endSession();
@@ -68,7 +69,7 @@ async function medBulkUpsert(medArray) {
 
     await session.commitTransaction();
   } catch (error) {
-    console.error("Error performing med bulk :", error);
+    winston.error("Error performing med bulk:", error);
     await session.abortTransaction();
   } finally {
     session.endSession();
@@ -124,7 +125,7 @@ async function medSimActBulkUpsert(medArray) {
 
     await session.commitTransaction();
   } catch (error) {
-    console.error("Error performing medSimAct bulk :", error);
+    winston.error("Error performing medSimAct bulk:", error);
     await session.abortTransaction();
   } finally {
     session.endSession();
