@@ -1,4 +1,4 @@
-const User = require("../models/user");
+const User = require("../models/user.model");
 
 const allUsers = async (sort, skip, queryLimit) => {
   try {

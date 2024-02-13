@@ -2,13 +2,13 @@ const cron = require("node-cron");
 const path = require("path");
 const axios = require("axios");
 const cheerio = require("cheerio");
-const { getLabs, getMeds } = require("./scapper");
+const { getLabs, getMeds } = require("./scrap.service");
 const {
   labBulkUpsert,
   medBulkUpsert,
   medSimActBulkUpsert,
-} = require("./mongoBulk");
-const { readSettings, saveSettings } = require("../utils/writeToJSON");
+} = require("./bulk.service");
+const { readSettings, saveSettings } = require("../utils/writeToJSON.util");
 
 // path to json config file
 const settingsFilePath = path.join(__dirname, "..", "config", "settings.json");

@@ -1,5 +1,3 @@
-const mongoose = require("mongoose");
-const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const { body, validationResult } = require("express-validator");
 

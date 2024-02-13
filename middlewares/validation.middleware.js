@@ -8,6 +8,7 @@ exports.allCheck = [
   param("page").optional().isInt({ min: 1 }),
 
   // Validate 'orderField' (optional)
+  // TODO: add isIn that is generated from a set of the list of fields in meds and labs
   param("orderField").optional().isString(),
 
   // Validate 'order' (optional)

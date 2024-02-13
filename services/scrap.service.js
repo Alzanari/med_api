@@ -1,7 +1,7 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
 const axiosRetry = require("axios-retry");
-const { getAttributes } = require("../utils/attributes");
+const { getAttributes } = require("../utils/attribute.util");
 
 axiosRetry(axios, {
   shouldResetTimeout: true,

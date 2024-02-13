@@ -1,8 +1,8 @@
 const express = require("express");
-const User = require("./models/user");
+const User = require("./models/user.model");
 require("dotenv").config();
 const mongoose = require("mongoose");
-const { apiLimiter } = require("./middlewares/rateLimit");
+const { apiLimiter } = require("./middlewares/rateLimit.middleware");
 
 const app = express();
 
@@ -31,18 +31,33 @@ mongoose.connection.on("open", async function () {
 app.use(apiLimiter);
 
 // routes config
-const authRouter = require("./routes/auth");
-const labRouter = require("./routes/lab");
-const medRouter = require("./routes/med");
-const userRouter = require("./routes/user");
+const authRouter = require("./routes/auth.route");
+const labRouter = require("./routes/lab.route");
+const medRouter = require("./routes/med.route");
+const userRouter = require("./routes/user.route");
 app.use("/auth", authRouter);
 app.use("/lab", labRouter);
 app.use("/med", medRouter);
 app.use("/user", userRouter);
 
 // Cron jobs section
-const cronGetUpdates = require("./services/cronjob");
+const cronGetUpdates = require("./services/cron.service");
 cronGetUpdates.start();
+
+// const {
+//   getLabs,
+//   getMeds,
+//   scrapList,
+//   scrapLab,
+//   scrapMed,
+// } = require("./services/scrap.service");
+// let x = async () => {
+//   let test = await getMeds(
+//     "https://medicament.ma/listing-des-medicaments/page/8/?lettre=Z"
+//   );
+//   console.log(test);
+// };
+// x();
 
 // run server and listen on PORT
 const PORT = process.env.PORT || 3030;

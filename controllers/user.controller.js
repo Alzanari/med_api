@@ -5,7 +5,7 @@ const {
   insertUser,
   updateUser,
   deleteUser,
-} = require("../services/userService");
+} = require("../services/user.service");
 
 const getAllUsers = async (req, res) => {
   const { page, limit, orderField, order, ...filters } = req.query;

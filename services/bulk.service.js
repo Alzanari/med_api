@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const Lab = require("../models/lab");
-const Med = require("../models/med");
+const Lab = require("../models/lab.model");
+const Med = require("../models/med.model");
 
 async function labBulkUpsert(labArray) {
   const session = await mongoose.startSession();

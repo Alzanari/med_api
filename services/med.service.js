@@ -1,4 +1,4 @@
-const Med = require("../models/med");
+const Med = require("../models/med.model");
 
 const allMeds = async (sort, skip, queryLimit) => {
   try {

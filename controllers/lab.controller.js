@@ -5,7 +5,7 @@ const {
   insertLab,
   updateLab,
   deleteLab,
-} = require("../services/labService");
+} = require("../services/lab.service");
 
 const getAllLabs = async (req, res) => {
   const result = validationResult(req);
@@ -48,9 +48,9 @@ const createLab = async (req, res) => {
 };
 
 const getLabByTitle = async (req, res) => {
-  const labId = req.params.id;
+  const labTitle = req.params.title;
   try {
-    const lab = await labByTitle(labId);
+    const lab = await labByTitle(labTitle);
     if (!lab) {
       return res.status(404).json({ error: "Lab not found" });
     }
@@ -61,9 +61,9 @@ const getLabByTitle = async (req, res) => {
 };
 
 const updateLabByTitle = async (req, res) => {
-  const labId = req.params.id;
+  const labTitle = req.params.title;
   try {
-    const updatedLab = await updateLab(labId, req.body);
+    const updatedLab = await updateLab(labTitle, req.body);
     if (!updatedLab) {
       return res.status(404).json({ error: "Lab not found" });
     }
@@ -74,9 +74,9 @@ const updateLabByTitle = async (req, res) => {
 };
 
 const deleteLabByTitle = async (req, res) => {
-  const labId = req.params.id;
+  const labTitle = req.params.title;
   try {
-    const deletedLab = await deleteLab(labId);
+    const deletedLab = await deleteLab(labTitle);
     if (!deletedLab) {
       return res.status(404).json({ error: "Lab not found" });
     }

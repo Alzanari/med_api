@@ -6,7 +6,7 @@ const {
   insertMed,
   updateMed,
   deleteMed,
-} = require("../services/medService");
+} = require("../services/med.service");
 
 const getAllMeds = async (req, res) => {
   const result = validationResult(req);
@@ -48,8 +48,8 @@ const createMed = async (req, res) => {
   }
 };
 
-const getMedById = async (req, res) => {
-  const medId = req.params.id;
+const getMedByMedId = async (req, res) => {
+  const medId = req.params.medId;
   try {
     const med = await medByMedid(medId);
     if (!med) {
@@ -61,8 +61,8 @@ const getMedById = async (req, res) => {
   }
 };
 
-const updateMedById = async (req, res) => {
-  const medId = req.params.id;
+const updateMedByMedId = async (req, res) => {
+  const medId = req.params.medId;
   try {
     const updatedMed = await updateMed(medId, req.body);
     if (!updatedMed) {
@@ -74,8 +74,8 @@ const updateMedById = async (req, res) => {
   }
 };
 
-const deleteMedById = async (req, res) => {
-  const medId = req.params.id;
+const deleteMedByMedId = async (req, res) => {
+  const medId = req.params.medId;
   try {
     const deletedMed = await deleteMed(medId);
     if (!deletedMed) {
@@ -89,8 +89,8 @@ const deleteMedById = async (req, res) => {
 
 module.exports = {
   getAllMeds,
-  getMedById,
+  getMedByMedId,
   createMed,
-  updateMedById,
-  deleteMedById,
+  updateMedByMedId,
+  deleteMedByMedId,
 };

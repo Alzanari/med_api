@@ -3,7 +3,7 @@ const {
   userByRefreshToken,
   insertUser,
   updateUserRefreshToken,
-} = require("../services/userService");
+} = require("../services/user.service");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 

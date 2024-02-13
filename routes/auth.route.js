@@ -5,7 +5,7 @@ const {
   login,
   logout,
   refreshToken,
-} = require("../controllers/auth");
+} = require("../controllers/auth.controller");
 
 // Define routes using the taskController methods
 router.route("/").get(logout).post(login);
