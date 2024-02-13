@@ -178,9 +178,9 @@ const getMeds = async (url) => {
       console.log(listItem.link);
 
       let attributeArray = getAttributes(listItem.title);
-      listItem.title = attributeArray[0];
-      listItem.form = attributeArray[1];
-      listItem.type = attributeArray[2];
+      listItem.title = attributeArray[0] ?? listItem.title;
+      listItem.form = attributeArray[1] ?? "";
+      listItem.type = attributeArray[2] ?? "";
     }
     List = [...List, ...listData.List];
 

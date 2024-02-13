@@ -49,10 +49,10 @@ const getAttributes = (str) => {
     let strSplit = str.indexOf(",") >= 0 ? str.split(/\,(?=[^\,]+$)/) : "";
 
     if (!strSplit) {
-      return [str, "", ""];
+      return [str];
     }
 
-    let title = strSplit ? strSplit[0] : str;
+    let title = strSplit[0];
     let form = strSplit[1].trim();
     let type = findType(form);
     return [title, form, type];
@@ -63,10 +63,10 @@ const getAttributes = (str) => {
         let strSplit = str.indexOf(",") >= 0 ? str.split(/\,(?=[^\,]+$)/) : "";
 
         if (!strSplit) {
-          return [str, "", ""];
+          return [str];
         }
 
-        let title = strSplit ? strSplit[0] : str;
+        let title = strSplit[0];
         let form = strSplit[1].trim();
         let type = findType(form);
         return [title, form, type];
