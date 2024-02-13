@@ -23,7 +23,7 @@ async function labBulkUpsert(labArray) {
 
     await session.commitTransaction();
   } catch (error) {
-    winston.error("Error performing lab bulk:", error);
+    winston.error(`Error performing lab bulk: ${error}`);
     await session.abortTransaction();
   } finally {
     session.endSession();
@@ -69,7 +69,7 @@ async function medBulkUpsert(medArray) {
 
     await session.commitTransaction();
   } catch (error) {
-    winston.error("Error performing med bulk:", error);
+    winston.error(`Error performing med bulk: ${error}`);
     await session.abortTransaction();
   } finally {
     session.endSession();
@@ -125,7 +125,7 @@ async function medSimActBulkUpsert(medArray) {
 
     await session.commitTransaction();
   } catch (error) {
-    winston.error("Error performing medSimAct bulk:", error);
+    winston.error(`Error performing medSimAct bulk: ${error}`);
     await session.abortTransaction();
   } finally {
     session.endSession();
