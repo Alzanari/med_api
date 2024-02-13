@@ -185,8 +185,8 @@ const getMeds = async (url) => {
     }
     List = [...List, ...listData.List];
 
-    if (listData.pageCharURL) {
-      nextLetterUrl = listData.pageCharURL;
+    if (listData.nextCharURL) {
+      nextLetterUrl = listData.nextCharURL;
       url = nextLetterUrl;
     } else {
       break;
