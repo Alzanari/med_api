@@ -48,10 +48,10 @@ const authRouter = require("./routes/auth.route");
 const labRouter = require("./routes/lab.route");
 const medRouter = require("./routes/med.route");
 const userRouter = require("./routes/user.route");
-app.use("/auth", authRouter);
-app.use("/lab", labRouter);
-app.use("/med", medRouter);
-app.use("/user", userRouter);
+app.use("/v1/auth", authRouter);
+app.use("/v1/labs", labRouter);
+app.use("/v1/meds", medRouter);
+app.use("/v1/users", userRouter);
 
 // Cron jobs section
 const cronGetUpdates = require("./services/cron.service");
