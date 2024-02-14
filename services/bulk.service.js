@@ -41,7 +41,7 @@ async function medBulkUpsert(medArray) {
       // split med object and seperate similar and activeSubstance from the rest of the data
       const {
         medId,
-        Distributeur_ou_fabriquant,
+        distributeur_ou_fabriquant,
         similar,
         activeSubstance,
         ...updateData
@@ -49,8 +49,8 @@ async function medBulkUpsert(medArray) {
 
       // match fab to lab title, if match found get id and add it to updatedata fab property
       labsInDb.forEach((lab) => {
-        if (lab.title === Distributeur_ou_fabriquant) {
-          updateData.Distributeur_ou_fabriquant = lab._id;
+        if (lab.title === distributeur_ou_fabriquant) {
+          updateData.distributeur_ou_fabriquant = lab._id;
         }
       });
 

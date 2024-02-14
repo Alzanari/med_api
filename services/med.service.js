@@ -5,7 +5,7 @@ const allMeds = async (sort, skip, queryLimit) => {
   try {
     const result = await Med.find()
       .populate({
-        path: "Distributeur_ou_fabriquant",
+        path: "distributeur_ou_fabriquant",
         select: "title link -_medId",
       })
       .populate({
