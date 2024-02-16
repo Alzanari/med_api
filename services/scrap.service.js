@@ -50,7 +50,7 @@ const getLabs = async (url, savePath = labsFilePath) => {
     case 3:
       winston.info("upserting labs data start");
       labs.List = await upsertList(labs.List, "lab");
-      saveSettings(savePath, { step: 0, List: {} });
+      saveSettings(savePath, { step: 0, List: {}, previous: labs.List });
       winston.info("upserting labs data done");
       break;
     default:
@@ -89,7 +89,7 @@ const getMeds = async (url, savePath = medsFilePath) => {
     case 4:
       winston.info("upserting meds data start");
       meds.List = await upsertList(meds.List, "med");
-      saveSettings(savePath, { step: 0, List: [] });
+      saveSettings(savePath, { step: 0, List: [], previous: meds.List });
       winston.info("upserting meds data done");
       break;
     default:
