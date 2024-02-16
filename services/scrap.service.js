@@ -1,8 +1,20 @@
 const axios = require("axios");
+const https = require("https");
+const axiosRetry = require("axios-retry").default;
 const cheerio = require("cheerio");
-const axiosRetry = require("axios-retry");
-const { getAttributes } = require("../utils/attribute.util");
+
 const winston = require("../config/winston.config");
+
+const path = require("path");
+const { readSettings, saveSettings } = require("../utils/writeToJSON.util");
+
+const { getAttributes } = require("../utils/attribute.util");
+
+const {
+  labBulkUpsert,
+  medBulkUpsert,
+  medSimActBulkUpsert,
+} = require("./bulk.service");
 
 axiosRetry(axios, {
   shouldResetTimeout: true,
@@ -34,7 +46,10 @@ const scrapList = async (url) => {
   let nextCharURL = "";
 
   do {
-    const html = await axios.get(page, { timeout: 3000 });
+    const html = await axios.get(page, {
+      timeout: 3000,
+      httpsAgent: new https.Agent({ keepAlive: true }),
+    });
     const $ = cheerio.load(html.data);
 
     $("table > tbody > tr").each(function () {
@@ -61,13 +76,31 @@ const scrapList = async (url) => {
   return { List, nextCharURL };
 };
 
-const scrapLab = async (url) => {
-  const html = await axios.get(url, { timeout: 3000 });
+const scrapItem = async (url, med = false) => {
+  const html = await axios.get(url, {
+    timeout: 3000,
+    httpsAgent: new https.Agent({ keepAlive: true }),
+  });
   const $ = cheerio.load(html.data);
+
+  let res = $("table > tbody").html().trim();
+
+  // get med's similar and activesubstance lists link
+  if (med) {
+    let links = $(
+      "#wrapper > div.container.main > div.row > div.col-md-9 > div.single.single-medicament > div.text-right.no-print"
+    ).html();
+    res = res.concat(`<div class="simAct">${links}</div>`);
+  }
+  return res;
+};
+
+const scrapLab = (html) => {
+  const $ = cheerio.load(html, null, false);
 
   let res = {};
 
-  $("table > tbody > tr").each(function () {
+  $("tr").each(function () {
     const field = $(this).find("td.field").text().trim().split(" ").join("_");
 
     let value = null;
@@ -97,14 +130,13 @@ const scrapLab = async (url) => {
   return res;
 };
 
-const scrapMed = async (url) => {
-  const html = await axios.get(url, { timeout: 3000 });
-  const $ = cheerio.load(html.data);
+const scrapMed = (html, title) => {
+  const $ = cheerio.load(html, null, false);
 
   let res = {};
 
   // scrap table body
-  $("table > tbody > tr").each(function () {
+  $("tr").each(function () {
     const field = $(this).find("td.field").text().trim().split(" ").join("_");
 
     let value = null;
@@ -132,73 +164,153 @@ const scrapMed = async (url) => {
   });
 
   // get similar meds link
-  let similarbtn = $(
-    "#wrapper > div.container.main > div.row > div.col-md-9 > div.single.single-medicament > div.text-right.no-print > a:nth-child(2)"
-  ).attr("href");
+  let similarbtn = $(".simAct > a.btn").eq(0).attr("href");
   const similarLink = "https://medicament.ma" + similarbtn;
   res.similar = similarLink;
 
   // get Active substance med link
-  const activeSubLink = $(
-    "#wrapper > div.container.main > div.row > div.col-md-9 > div.single.single-medicament > div.text-right.no-print > a:nth-child(3)"
-  ).attr("href");
+  const activeSubLink = $(".simAct > a.btn").eq(1).attr("href");
   res.activeSubstance = activeSubLink;
 
   //get med index from similar meds link
   res["medId"] = parseInt(RegExp(/(?<=&s=).*/gm).exec(similarLink)[0]);
 
+  //get attributes from title
+  let attributeArray = getAttributes(title);
+  res.title = attributeArray[0] ?? title;
+  res.form = attributeArray[1] ?? "";
+  res.type = attributeArray[2] ?? "";
+
   return res;
 };
 
+const getDbRef = async (url) => {
+  const html = await axios.get(url, {
+    timeout: 3000,
+    httpsAgent: new https.Agent({ keepAlive: true }),
+  });
+  const $ = cheerio.load(html.data);
+  let latest = $("footer .meta").first().text();
+  let ref = $("footer .meta").last().text();
+  return { latest, ref };
+};
+
 const getLabs = async (url) => {
-  let listData = await scrapList(url);
+  const labsFilePath = path.join(__dirname, ".", "scrap", "lab.scrap.json");
+  let labs = readSettings(labsFilePath);
 
-  for await (const listItem of listData.List) {
-    let labData = await scrapLab(listItem.link);
-    Object.assign(listItem, labData);
-    console.log(listItem.link);
+  switch (labs.step) {
+    case 0:
+      console.log("step 1 start");
+      labs = await scrapList(url);
+      labs.step = 1;
+      saveSettings(labsFilePath, labs);
+      console.log("step 1 done");
+    case 1:
+      console.log("step 2 start");
+      for await (const listItem of labs.List) {
+        listItem.html = await scrapItem(listItem.link);
+      }
+      labs.step = 2;
+      saveSettings(labsFilePath, labs);
+      console.log("step 2 done");
+    case 2:
+      console.log("step 3 start");
+      for await (const [key, listItem] of labs.List.entries()) {
+        let labData = scrapLab(listItem.html);
+        delete listItem.html;
+        Object.assign(listItem, labData);
+        // console.log(key, listItem.link);
+      }
+      labs.step = 3;
+      saveSettings(labsFilePath, labs);
+      console.log("step 3 done");
+    case 3:
+      console.log("step 4 start");
+      delete labs.step;
+      await labBulkUpsert(labs.List);
+      saveSettings(labsFilePath, { step: 0 });
+      console.log("step 4 done");
+      break;
+    default:
+      break;
   }
-
-  return listData.List;
 };
 
 const getMeds = async (url) => {
-  let List = [];
-  let nextLetterUrl = "";
+  const medsFilePath = path.join(__dirname, ".", "scrap", "med.scrap.json");
+  let meds = readSettings(medsFilePath);
 
-  do {
-    let listData = await scrapList(url);
-    for await (const listItem of listData.List) {
-      let medData = await scrapMed(listItem.link);
-      Object.assign(listItem, medData);
+  switch (meds.step) {
+    case 0:
+      console.log("step 1 start");
+      let nextLetterUrl = "";
+      do {
+        let listData = await scrapList(url);
+        meds.List = [...meds.List, ...listData.List];
 
-      listItem.similar = (await scrapList(listItem.similar)).List;
-      listItem.activeSubstance = (
-        await scrapList(listItem.activeSubstance)
-      ).List;
-      console.log(listItem.link);
-
-      let attributeArray = getAttributes(listItem.title);
-      listItem.title = attributeArray[0] ?? listItem.title;
-      listItem.form = attributeArray[1] ?? "";
-      listItem.type = attributeArray[2] ?? "";
-    }
-    List = [...List, ...listData.List];
-
-    if (listData.nextCharURL) {
-      nextLetterUrl = listData.nextCharURL;
-      url = nextLetterUrl;
-    } else {
+        if (listData.nextCharURL) {
+          nextLetterUrl = listData.nextCharURL;
+          url = nextLetterUrl;
+          console.log("next ", nextLetterUrl);
+        } else {
+          break;
+        }
+      } while (nextLetterUrl.length);
+      meds.step = 1;
+      saveSettings(medsFilePath, meds);
+      console.log("step 1 done");
+    case 1:
+      console.log("step 2 start");
+      for await (const listItem of meds.List) {
+        listItem.html = await scrapItem(listItem.link, true);
+      }
+      meds.step = 2;
+      saveSettings(medsFilePath, meds);
+      console.log("step 2 done");
+    case 2:
+      console.log("step 3 start");
+      for (const [key, listItem] of meds.List.entries()) {
+        let labData = scrapMed(listItem.html, listItem.title);
+        delete listItem.html;
+        Object.assign(listItem, labData);
+        // console.log(key, listItem.link);
+      }
+      meds.step = 3;
+      saveSettings(medsFilePath, meds);
+      console.log("step 3 done");
+    case 3:
+      console.log("step 4 start");
+      for (const listItem of meds.List) {
+        let [sim, actSub] = await Promise.all([
+          scrapList(listItem.similar),
+          scrapList(listItem.activeSubstance),
+        ]);
+        listItem.similar = sim.List;
+        listItem.activeSubstance = actSub.List;
+      }
+      meds.step = 4;
+      saveSettings(medsFilePath, meds);
+      console.log("step 4 done");
+    case 4:
+      console.log("step 5 start");
+      delete meds.step;
+      await medBulkUpsert(meds.List);
+      await medSimActBulkUpsert(meds.List);
+      saveSettings(medsFilePath, { step: 0, List: [] });
+      console.log("step 5 done");
       break;
-    }
-  } while (nextLetterUrl.length);
-  return List;
+    default:
+      break;
+  }
 };
 
 module.exports = {
   scrapList,
   scrapLab,
   scrapMed,
+  scrapItem,
+  getDbRef,
   getLabs,
   getMeds,
 };
