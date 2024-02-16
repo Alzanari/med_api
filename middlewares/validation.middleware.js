@@ -18,7 +18,7 @@ exports.allCheck = [
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       const notFoundError = new Error(errors.array());
-      winston.error(notFoundError.message);
+      winston.error(notFoundError.stack);
       return res.status(4222).json({ error: errors.array() });
     }
     next();
