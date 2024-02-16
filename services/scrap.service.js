@@ -30,28 +30,28 @@ const getLabs = async (url, savePath = labsFilePath) => {
 
   switch (labs.step) {
     case 0:
-      console.log("step 1 start");
+      winston.info("parse lab list start");
       labs.List = await getList(url);
       labs.step = 1;
       saveSettings(savePath, labs);
-      console.log("step 1 done");
+      winston.info("parse lab list done");
     case 1:
-      console.log("step 2 start");
+      winston.info("getting labs HTML start");
       labs.List = await getHtml(labs.List);
       labs.step = 2;
       saveSettings(savePath, labs);
-      console.log("step 2 done");
+      winston.info("getting labs HTML done");
     case 2:
-      console.log("step 3 start");
+      winston.info("getting labs data start");
       labs.List = getData(labs.List, "lab");
       labs.step = 3;
       saveSettings(savePath, labs);
-      console.log("step 3 done");
+      winston.info("getting labs data done");
     case 3:
-      console.log("step 4 start");
+      winston.info("upserting labs data start");
       labs.List = await upsertList(labs.List, "lab");
       saveSettings(savePath, { step: 0, List: {} });
-      console.log("step 4 done");
+      winston.info("upserting labs data done");
       break;
     default:
       break;
@@ -63,34 +63,34 @@ const getMeds = async (url, savePath = medsFilePath) => {
 
   switch (meds.step) {
     case 0:
-      console.log("step 1 start");
+      winston.info("parse med list start");
       meds.List = await getList(url);
       meds.step = 1;
       saveSettings(savePath, meds);
-      console.log("step 1 done");
+      winston.info("parse med list done");
     case 1:
-      console.log("step 2 start");
+      winston.info("getting meds HTML start");
       meds.List = await getHtml(meds.List, "med");
       meds.step = 2;
       saveSettings(savePath, meds);
-      console.log("step 2 done");
+      winston.info("getting meds HTML done");
     case 2:
-      console.log("step 3 start");
+      winston.info("getting meds data start");
       meds.List = getData(meds.List, "med");
       meds.step = 3;
       saveSettings(savePath, meds);
-      console.log("step 3 done");
+      winston.info("getting meds data done");
     case 3:
-      console.log("step 4 start");
+      winston.info("getting similar meds start");
       meds.List = await getSimAct(meds.List);
       meds.step = 4;
       saveSettings(savePath, meds);
-      console.log("step 4 done");
+      winston.info("getting similar meds done");
     case 4:
-      console.log("step 5 start");
+      winston.info("upserting meds data start");
       meds.List = await upsertList(meds.List, "med");
       saveSettings(savePath, { step: 0, List: [] });
-      console.log("step 5 done");
+      winston.info("upserting meds data done");
       break;
     default:
       break;
@@ -107,7 +107,7 @@ const getList = async (url) => {
     if (listData.nextCharURL) {
       nextLetterUrl = listData.nextCharURL;
       url = nextLetterUrl;
-      console.log("next ", nextLetterUrl);
+      winston.info("next letter:", nextLetterUrl);
     } else {
       break;
     }
