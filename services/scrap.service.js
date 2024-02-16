@@ -18,19 +18,12 @@ const {
 
 axiosRetry(axios, {
   shouldResetTimeout: true,
+  retries: 100,
   retryDelay: (retryCount) => {
-    return retryCount * 1000;
+    return retryCount * 100;
   },
-  retryCondition(error) {
-    // Conditional check the error status cod
-    let status = "response" in error ? error.response.status : 0;
-    if (status >= 400) {
-      return true;
-    } else if (error.code === "ECONNABORTED" || error.code === "ENOTFOUND") {
-      return true;
-    } else {
-      return false;
-    }
+  retryCondition: (error) => {
+    return true;
   },
   onRetry: (retryCount, error, requestConfig) => {
     winston.warn(
