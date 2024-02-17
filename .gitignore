@@ -130,4 +130,4 @@ dist
 .pnp.*
 config/settings.json
 test.js
-.services/scrap/
+services/scrap/
