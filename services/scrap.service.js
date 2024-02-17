@@ -150,13 +150,13 @@ const getSimAct = async (list) => {
   }
   return list;
 };
-const upsertList = async (type) => {
+const upsertList = async (list, type) => {
   if (type == "lab") {
-    await labBulkUpsert(labs.List);
+    await labBulkUpsert(list);
   }
   if (type == "med") {
-    await medBulkUpsert(meds.List);
-    await medSimActBulkUpsert(meds.List);
+    await medBulkUpsert(list);
+    await medSimActBulkUpsert(list);
   }
 };
 
