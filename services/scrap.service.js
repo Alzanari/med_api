@@ -107,7 +107,6 @@ const getList = async (url) => {
     if (listData.nextCharURL) {
       nextLetterUrl = listData.nextCharURL;
       url = nextLetterUrl;
-      winston.info(`next letter:, ${nextLetterUrl}`);
     } else {
       break;
     }
