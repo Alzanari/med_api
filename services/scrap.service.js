@@ -49,7 +49,7 @@ const getLabs = async (url, savePath = labsFilePath) => {
       winston.info("getting labs data done");
     case 3:
       winston.info("upserting labs data start");
-      labs.List = await upsertList(labs.List, "lab");
+      await upsertList(labs.List, "lab");
       saveSettings(savePath, { step: 0, List: {}, previous: labs.List });
       winston.info("upserting labs data done");
       break;
@@ -88,7 +88,7 @@ const getMeds = async (url, savePath = medsFilePath) => {
       winston.info("getting similar meds done");
     case 4:
       winston.info("upserting meds data start");
-      meds.List = await upsertList(meds.List, "med");
+      await upsertList(meds.List, "med");
       saveSettings(savePath, { step: 0, List: [], previous: meds.List });
       winston.info("upserting meds data done");
       break;
@@ -118,15 +118,16 @@ const getList = async (url) => {
   return res;
 };
 const getHtml = async (lists, type) => {
-  for (const list of lists) {
+  for (const [i, list] of lists.entries()) {
     for await (const listItem of list) {
       listItem.html = await scrapItem(listItem.link, type);
     }
+    winston.info(`list ${i + 1} html is done`);
   }
   return lists;
 };
 const getData = (lists, type) => {
-  for (const list of lists) {
+  for (const [i, list] of lists.entries()) {
     if (type == "lab") {
       for (const listItem of list) {
         let labData = scrapLab(listItem.html, listItem.title);
@@ -143,11 +144,13 @@ const getData = (lists, type) => {
         // console.log(listItem.link);
       }
     }
+
+    winston.info(`list ${i + 1} data is done`);
   }
   return lists;
 };
 const getSimAct = async (lists) => {
-  for (const list of lists) {
+  for (const [i, list] of lists.entries()) {
     for (const listItem of list) {
       let [sim, actSub] = await Promise.all([
         scrapList(listItem.similar),
@@ -156,6 +159,8 @@ const getSimAct = async (lists) => {
       listItem.similar = sim.List;
       listItem.activeSubstance = actSub.List;
     }
+
+    winston.info(`list ${i + 1} SimAct is done`);
   }
   return lists;
 };
@@ -163,10 +168,13 @@ const upsertList = async (lists, type) => {
   lists = lists.flat();
   if (type == "lab") {
     await labBulkUpsert(lists);
+    winston.info(`labs bulk upsert is done`);
   }
   if (type == "med") {
     await medBulkUpsert(lists);
+    winston.info(`meds bulk upsert is done`);
     await medSimActBulkUpsert(lists);
+    winston.info(`meds' similar and active substance bulk upsert is done`);
   }
 };
 
