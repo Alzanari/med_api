@@ -1,4 +1,4 @@
-const { matchedData } = require("express-validator");
+const { matchedData, validationResult } = require("express-validator");
 const {
   allLabs,
   labCount,
