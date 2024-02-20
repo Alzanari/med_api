@@ -100,9 +100,13 @@ const getMeds = async (url, savePath = medsFilePath) => {
 const getList = async (url) => {
   let nextLetterUrl = "";
   let res = [];
+  let counter = 0;
   do {
     let listData = await scrapList(url);
-    res = [...res, ...listData.List];
+    res.push(listData.List);
+    counter++;
+
+    winston.info(`list ${counter} has ${listData.List.length} items`);
 
     if (listData.nextCharURL) {
       nextLetterUrl = listData.nextCharURL;
@@ -113,49 +117,56 @@ const getList = async (url) => {
   } while (nextLetterUrl.length);
   return res;
 };
-const getHtml = async (list, type) => {
-  for await (const listItem of list) {
-    listItem.html = await scrapItem(listItem.link, type);
-  }
-  return list;
-};
-const getData = (list, type) => {
-  if (type == "lab") {
-    for (const listItem of list) {
-      let labData = scrapLab(listItem.html, listItem.title);
-      delete listItem.html;
-      Object.assign(listItem, labData);
-      // console.log(listItem.link);
+const getHtml = async (lists, type) => {
+  for (const list of lists) {
+    for await (const listItem of list) {
+      listItem.html = await scrapItem(listItem.link, type);
     }
   }
-  if (type == "med") {
-    for (const listItem of list) {
-      let labData = scrapMed(listItem.html, listItem.title);
-      delete listItem.html;
-      Object.assign(listItem, labData);
-      // console.log(listItem.link);
+  return lists;
+};
+const getData = (lists, type) => {
+  for (const list of lists) {
+    if (type == "lab") {
+      for (const listItem of list) {
+        let labData = scrapLab(listItem.html, listItem.title);
+        delete listItem.html;
+        Object.assign(listItem, labData);
+        // console.log(listItem.link);
+      }
+    }
+    if (type == "med") {
+      for (const listItem of list) {
+        let labData = scrapMed(listItem.html, listItem.title);
+        delete listItem.html;
+        Object.assign(listItem, labData);
+        // console.log(listItem.link);
+      }
     }
   }
-  return list;
+  return lists;
 };
-const getSimAct = async (list) => {
-  for (const listItem of list) {
-    let [sim, actSub] = await Promise.all([
-      scrapList(listItem.similar),
-      scrapList(listItem.activeSubstance),
-    ]);
-    listItem.similar = sim.List;
-    listItem.activeSubstance = actSub.List;
+const getSimAct = async (lists) => {
+  for (const list of lists) {
+    for (const listItem of list) {
+      let [sim, actSub] = await Promise.all([
+        scrapList(listItem.similar),
+        scrapList(listItem.activeSubstance),
+      ]);
+      listItem.similar = sim.List;
+      listItem.activeSubstance = actSub.List;
+    }
   }
-  return list;
+  return lists;
 };
-const upsertList = async (list, type) => {
+const upsertList = async (lists, type) => {
+  lists = lists.flat();
   if (type == "lab") {
-    await labBulkUpsert(list);
+    await labBulkUpsert(lists);
   }
   if (type == "med") {
-    await medBulkUpsert(list);
-    await medSimActBulkUpsert(list);
+    await medBulkUpsert(lists);
+    await medSimActBulkUpsert(lists);
   }
 };
 
