@@ -11,12 +11,14 @@ app.use(express.json());
 
 // error handling for uncaught and unhandled
 process.on("uncaughtException", (error) => {
-  winston.error("Uncaught Exception:", error.message);
+  winston.error(`Uncaught Exception: ${error.message}`);
   // Perform cleanup tasks if needed
   process.exit(1);
 });
 process.on("unhandledRejection", (reason, promise) => {
-  winston.error("Unhandled Rejection at:", promise, "reason:", reason.message);
+  winston.error(
+    `Unhandled Rejection at: ${promise}, reason: ${reason.message}`
+  );
   // Perform cleanup tasks if needed
   process.exit(1);
 });
