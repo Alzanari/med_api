@@ -8,6 +8,7 @@ const winston = require("./config/winston.config");
 const app = express();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 // error handling for uncaught and unhandled
 process.on("uncaughtException", (error) => {
