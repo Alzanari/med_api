@@ -2,6 +2,7 @@ const {
   userByEmail,
   userByRefreshToken,
   insertUser,
+  updateUser,
   resetUserRefreshToken,
 } = require("../services/user.service");
 const bcrypt = require("bcrypt");
