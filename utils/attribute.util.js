@@ -26,9 +26,9 @@ const findType = (str) => {
     // .replace(/\p{Diacritic}/gu, "");
   }
 
-  // if fistwors is a number, type is unknown
-  if (!firstWord || typeof firstWord == "number") {
-    return "N/A";
+  // if fistwors is a number/empty, type is unknown
+  if (!firstWord || typeof parseInt(firstWord) == "number") {
+    return "n/a";
   }
   // if firstword is from this array type is the whole string
   if (returnAll.includes(firstWord)) {

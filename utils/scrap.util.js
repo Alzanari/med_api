@@ -162,8 +162,8 @@ const scrapMed = (html, title) => {
   //get attributes from title
   let attributeArray = getAttributes(title);
   res.title = attributeArray[0] ?? title;
-  res.form = attributeArray[1] ?? "";
-  res.type = attributeArray[2] ?? "";
+  res.form = attributeArray[1] ?? "n/a";
+  res.type = attributeArray[2] ?? "n/a";
 
   return res;
 };
