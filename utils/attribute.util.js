@@ -14,8 +14,11 @@ const findType = (str) => {
     "nourrisson",
     "et",
     "uv",
+    "nez",
+    "bouché",
+    "fragilisé",
   ];
-  let returnAll = ["hygiene", "bain", "nez", "dispositif", "patch", "pate"];
+  let returnAll = ["hygiene", "bain", "dispositif", "patch", "pate"];
 
   let firstWord = "";
   if (str.indexOf(" ") >= 0) {
@@ -28,7 +31,7 @@ const findType = (str) => {
 
   // if fistwors is a number/empty, type is unknown
   if (!firstWord || typeof parseInt(firstWord) == "number") {
-    return "n/a";
+    return "";
   }
   // if firstword is from this array type is the whole string
   if (returnAll.includes(firstWord)) {
