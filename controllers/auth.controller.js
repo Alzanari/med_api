@@ -2,7 +2,7 @@ const {
   userByEmail,
   userByRefreshToken,
   insertUser,
-  updateUserRefreshToken,
+  resetUserRefreshToken,
 } = require("../services/user.service");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -64,7 +64,7 @@ const logout = async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
 
     // Remove the refresh token from the database
-    await updateUserRefreshToken(refreshToken);
+    await resetUserRefreshToken(refreshToken);
 
     // Clear the token and refresh token cookie
     res.clearCookie("refreshToken");

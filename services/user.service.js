@@ -70,7 +70,7 @@ const updateUser = async (email, userData) => {
   }
 };
 
-const updateUserRefreshToken = async (refreshToken) => {
+const resetUserRefreshToken = async (refreshToken) => {
   try {
     const result = await User.findOneAndUpdate(
       { refreshToken },
@@ -100,6 +100,6 @@ module.exports = {
   userByRefreshToken,
   insertUser,
   updateUser,
-  updateUserRefreshToken,
+  resetUserRefreshToken,
   deleteUser,
 };
