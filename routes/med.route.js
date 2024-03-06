@@ -14,7 +14,7 @@ const Validator = require("../middlewares/validator.middleware");
 router
   .route("/")
   .get(Validator("allItems", "query"), getAllMeds)
-  .post(Jwt(), Validator("", "body"), createMed);
+  .post(Jwt(), Validator("medFields", "body"), createMed);
 
 router
   .route("/:medId")
@@ -22,7 +22,7 @@ router
   .patch(
     Jwt(),
     Validator("medId", "params"),
-    // Validator("", "body"),
+    Validator("medFields", "body"),
     updateMedByMedId
   )
   .delete(Jwt(), Validator("medId", "params"), deleteMedByMedId);
