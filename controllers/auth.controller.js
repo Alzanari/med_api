@@ -42,7 +42,7 @@ const login = async (req, res) => {
       return res.status(401).json({ error: notFoundError.message });
     }
 
-    const token = jwt.sign({ email }, process.env.SECRET_KEY, {
+    const accessToken = jwt.sign({ email }, process.env.SECRET_KEY, {
       expiresIn: "1h",
     });
     const refreshToken = jwt.sign({ email }, process.env.REFRESH_SECRET_KEY);
@@ -52,8 +52,7 @@ const login = async (req, res) => {
 
     // Set the token and refresh token as a cookie
     res.cookie("refreshToken", refreshToken, { httpOnly: true });
-    res.cookie("jwtToken", token, { httpOnly: true });
-    res.status(200).json({ message: "Authentication successful" });
+    res.status(200).json({ accessToken });
   } catch (error) {
     winston.error(error.message);
     res.status(500).json({ error: "Internal server error" });
