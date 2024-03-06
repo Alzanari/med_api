@@ -35,7 +35,7 @@ const findType = (str) => {
   }
   // if firstword is from this array type is the whole string
   if (returnAll.includes(firstWord)) {
-    return str;
+    return str.toLowerCase();
   }
   // if firstword is from this array move to the next word in string to the right of the comma
   if (typeRejects.includes(firstWord)) {
