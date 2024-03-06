@@ -93,6 +93,8 @@ const scrapLab = (html) => {
         value = $(this).find("td.value > a").attr("href");
         break;
       case "Fax":
+      case "Usine_Téléphone":
+      case "Usine_Fax":
       case "Tlx":
       case "Téléphone":
         value = [];
@@ -125,6 +127,15 @@ const scrapMed = (html, title) => {
 
     let value = null;
     switch (field) {
+      case "particularité":
+        value = $(this)
+          .find("td.value")
+          .text()
+          .replace(/\s+/g, " ")
+          .replace("Fournisseur : ", "")
+          .trim();
+
+        break;
       case "Base_de_remboursement_/_PPV":
       case "Prix_hospitalier":
       case "PPV":
