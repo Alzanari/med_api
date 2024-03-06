@@ -129,25 +129,25 @@ const scrapMed = (html, title) => {
 
     //field rename
     switch (field) {
-      case "contres-indication(s)":
+      case "Contres-indication(s)":
         field = "contres_indication";
         break;
-      case "indication(s)":
+      case "Indication(s)":
         field = "indication";
         break;
-      case "age_minimal_d'utilisation":
+      case "Age_minimal_d'utilisation":
         field = "age_minimal_d__utilisation";
         break;
-      case "base_de_remboursement_/_ppv":
+      case "Base_de_remboursement_/_ppv":
         field = "base_de_remboursement_ppv";
         break;
-      case "posologies_et_mode_d'administration":
+      case "Posologies_et_mode_d'administration":
         field = "posologies_et_mode_d__administration";
         break;
-      case "substance_(s)_psychoactive_(s)":
+      case "Substance_(s)_psychoactive_(s)":
         field = "substance_psychoactive";
         break;
-      case "risque_potentiel_de_dépendance_ou_d’abus":
+      case "Risque_potentiel_de_dépendance_ou_d’abus":
         field = "risque_potentiel_de_dépendance_ou_d__abus";
         break;
 
@@ -157,7 +157,7 @@ const scrapMed = (html, title) => {
 
     // value dependant on field
     switch (field) {
-      case "particularité":
+      case "Particularité":
         value = $(this)
           .find("td.value")
           .text()
@@ -174,8 +174,8 @@ const scrapMed = (html, title) => {
         const numericString = intiVal.replace(" dhs", "");
         value = parseFloat(numericString);
         break;
-      case "dosage":
-      case "composition":
+      case "Dosage":
+      case "Composition":
         let initVal = $(this)
           .find("td.value")
           .text()
