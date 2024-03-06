@@ -1,13 +1,15 @@
-const express = require("express");
-const User = require("./models/user.model");
 require("dotenv").config();
-const mongoose = require("mongoose");
+const express = require("express");
+const cookieParser = require("cookie-parser");
 const { apiLimiter } = require("./middlewares/rateLimit.middleware");
 const winston = require("./config/winston.config");
+const mongoose = require("mongoose");
+const User = require("./models/user.model");
 
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 
 // error handling for uncaught and unhandled
