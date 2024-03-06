@@ -126,6 +126,36 @@ const scrapMed = (html, title) => {
     const field = $(this).find("td.field").text().trim().split(" ").join("_");
 
     let value = null;
+
+    //field rename
+    switch (field) {
+      case "contres-indication(s)":
+        field = "contres_indication";
+        break;
+      case "indication(s)":
+        field = "indication";
+        break;
+      case "age_minimal_d'utilisation":
+        field = "age_minimal_d__utilisation";
+        break;
+      case "base_de_remboursement_/_ppv":
+        field = "base_de_remboursement_ppv";
+        break;
+      case "posologies_et_mode_d'administration":
+        field = "posologies_et_mode_d__administration";
+        break;
+      case "substance_(s)_psychoactive_(s)":
+        field = "substance_psychoactive";
+        break;
+      case "risque_potentiel_de_dépendance_ou_d’abus":
+        field = "risque_potentiel_de_dépendance_ou_d__abus";
+        break;
+
+      default:
+        break;
+    }
+
+    // value dependant on field
     switch (field) {
       case "particularité":
         value = $(this)
@@ -138,10 +168,20 @@ const scrapMed = (html, title) => {
         break;
       case "Base_de_remboursement_/_PPV":
       case "Prix_hospitalier":
+      case "PPC":
       case "PPV":
         let intiVal = $(this).find("td.value").text().trim();
         const numericString = intiVal.replace(" dhs", "");
         value = parseFloat(numericString);
+        break;
+      case "dosage":
+      case "composition":
+        let initVal = $(this)
+          .find("td.value")
+          .text()
+          .replace(/\s+/g, " ")
+          .trim();
+        value = initVal.split(/ \| /g);
         break;
       case "Boîte":
       case "Lien_du_Produit":
