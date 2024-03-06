@@ -1,4 +1,5 @@
 const Joi = require("joi");
+const { allItems } = require("./common.validator");
 
 const createUser = Joi.object()
   .keys({
@@ -12,12 +13,14 @@ const userEmail = Joi.object().keys({
   email: Joi.string().email().required(),
 });
 
-const userFields = Joi.object().keys({
+const fields = {
   email: Joi.string().email().lowercase(),
   password: Joi.string().min(8),
-});
+  refreshToken: Joi.string(),
+};
+const userFields = Joi.object().keys(fields);
 
-const allUsers = allItems.keys(userFields);
+const allUsers = allItems.keys(fields);
 
 module.exports = {
   createUser,

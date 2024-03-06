@@ -1,10 +1,11 @@
 const Joi = require("joi");
+const { allItems } = require("./common.validator");
 
 const medId = Joi.object().keys({
   medId: Joi.string().required(),
 });
 
-const medFields = Joi.object().keys({
+const fields = {
   statut: Joi.string().valid("Commercialisé"),
   conservation: Joi.string(),
   effets_indésirable: Joi.string(),
@@ -31,7 +32,7 @@ const medFields = Joi.object().keys({
   notice_en_arabe: Joi.string().uri(),
   présentation: Joi.string(),
   mises_en_garde: Joi.string(),
-  ppc: Joi.string(),
+  ppc: Joi.number(),
   convention_de_vienne: Joi.string().valid("Tableau III", "Tableau IV"),
   contres_indication: Joi.string(),
   boîte: Joi.string().uri(),
@@ -52,9 +53,11 @@ const medFields = Joi.object().keys({
   remboursement: Joi.string().valid("Non", "Oui"),
   tableau: Joi.string().valid("A", "Aucun", "B", "C"),
   indication: Joi.string(),
-});
+};
 
-const allMeds = allItems.keys(medFields);
+const medFields = Joi.object().keys(fields);
+
+const allMeds = allItems.keys(fields);
 
 module.exports = {
   medId,

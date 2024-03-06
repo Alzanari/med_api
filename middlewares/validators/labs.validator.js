@@ -5,7 +5,7 @@ const labTitle = Joi.object().keys({
   title: Joi.string().required(),
 });
 
-const labFields = Joi.object().keys({
+let fields = {
   fax: Joi.array().items(Joi.string()),
   statut: Joi.string(),
   adresse_usine: Joi.string(),
@@ -17,9 +17,11 @@ const labFields = Joi.object().keys({
   siteweb: Joi.string().uri(),
   usine_fax: Joi.array().items(Joi.string()),
   usine_téléphone: Joi.array().items(Joi.string()),
-});
+};
 
-const allLabs = allItems.keys(labFields);
+const labFields = Joi.object().keys(fields);
+
+const allLabs = allItems.keys(fields);
 
 module.exports = {
   labTitle,
