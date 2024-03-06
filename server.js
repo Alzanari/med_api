@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: false }));
 
 // error handling for uncaught and unhandled
 process.on("uncaughtException", (error) => {
-  winston.error(`Uncaught Exception: ${error.message}`);
+  winston.error(`Uncaught Exception: ${error.stack}`);
   // Perform cleanup tasks if needed
   process.exit(1);
 });
