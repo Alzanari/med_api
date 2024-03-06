@@ -7,7 +7,7 @@ const {
   updateMedByMedId,
   deleteMedByMedId,
 } = require("../controllers/med.controller");
-const Jwt = require("../middlewares/validator.middleware");
+const Jwt = require("../middlewares/jwt.middleware");
 const Validator = require("../middlewares/validator.middleware");
 
 // Define routes using the medController methods

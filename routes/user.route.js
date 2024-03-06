@@ -7,7 +7,7 @@ const {
   updateUserByEmail,
   deleteUserByEmail,
 } = require("../controllers/user.controller");
-const Jwt = require("../middlewares/validator.middleware");
+const Jwt = require("../middlewares/jwt.middleware");
 const Validator = require("../middlewares/validator.middleware");
 
 // Define routes using the userController methods

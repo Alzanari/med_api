@@ -6,7 +6,7 @@ const {
   logout,
   refreshToken,
 } = require("../controllers/auth.controller");
-const Jwt = require("../middlewares/validator.middleware");
+const Jwt = require("../middlewares/jwt.middleware");
 const Validator = require("../middlewares/validator.middleware");
 
 // Define routes using the taskController methods

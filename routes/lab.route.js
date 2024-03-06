@@ -7,7 +7,7 @@ const {
   updateLabByTitle,
   deleteLabByTitle,
 } = require("../controllers/lab.controller");
-const Jwt = require("../middlewares/validator.middleware");
+const Jwt = require("../middlewares/jwt.middleware");
 const Validator = require("../middlewares/validator.middleware");
 
 // Define routes using the labController methods
