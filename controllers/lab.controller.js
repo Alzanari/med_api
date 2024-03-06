@@ -1,4 +1,3 @@
-const { matchedData, validationResult } = require("express-validator");
 const {
   allLabs,
   labCount,
@@ -10,33 +9,30 @@ const {
 const winston = require("../config/winston.config");
 
 const getAllLabs = async (req, res) => {
-  const result = validationResult(req);
-  if (result.isEmpty()) {
-    const { page, limit, orderField, order } = matchedData(req);
-    const queryPage = page || 1;
-    const queryLimit = limit || 0;
-    const skip = (queryPage - 1) * queryLimit;
+  const { page, limit, orderField, order } = req.params;
+  const queryPage = page || 1;
+  const queryLimit = limit || 0;
+  const skip = (queryPage - 1) * queryLimit;
 
-    try {
-      const sort = {};
-      if (orderField) {
-        sort[orderField] = order === "desc" ? -1 : 1;
-      }
-
-      const labs = await allLabs(sort, skip, queryLimit);
-
-      const totalLabs = await labCount();
-
-      res.json({
-        data: labs,
-        page: queryPage,
-        totalPages: queryLimit == 0 ? 1 : Math.ceil(totalLabs / queryLimit),
-        totalLabs: labs.length,
-      });
-    } catch (error) {
-      winston.error(error.message);
-      res.status(500).json({ error: "Internal server error" });
+  try {
+    const sort = {};
+    if (orderField) {
+      sort[orderField] = order === "desc" ? -1 : 1;
     }
+
+    const labs = await allLabs(sort, skip, queryLimit);
+
+    const totalLabs = await labCount();
+
+    res.json({
+      data: labs,
+      page: queryPage,
+      totalPages: queryLimit == 0 ? 1 : Math.ceil(totalLabs / queryLimit),
+      totalLabs: labs.length,
+    });
+  } catch (error) {
+    winston.error(error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
