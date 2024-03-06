@@ -147,6 +147,7 @@ const scrapMed = (html, title) => {
       case "Lien_du_Produit":
       case "Notice_en_arabe":
       case "Notice_en_français":
+      case "RCP":
         value = $(this).find("td.value > a").attr("href");
         break;
 
