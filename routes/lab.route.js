@@ -7,15 +7,24 @@ const {
   updateLabByTitle,
   deleteLabByTitle,
 } = require("../controllers/lab.controller");
-const { allCheck } = require("../middlewares/validation.middleware");
+const Jwt = require("../middlewares/validator.middleware");
+const Validator = require("../middlewares/validator.middleware");
 
 // Define routes using the labController methods
-router.route("/").get(allCheck, getAllLabs).post(createLab);
+router
+  .route("/")
+  .get(Validator("allItems", "query"), getAllLabs)
+  .post(Jwt(), Validator("createItem", "body"), createLab);
 
 router
   .route("/:title")
-  .get(getLabByTitle)
-  .patch(updateLabByTitle)
-  .delete(deleteLabByTitle);
+  .get(Validator("labTitle", "params"), getLabByTitle)
+  .patch(
+    Jwt(),
+    Validator("labTitle", "params"),
+    // Validator("", "body"),
+    updateLabByTitle
+  )
+  .delete(Jwt(), Validator("labTitle", "params"), deleteLabByTitle);
 
 module.exports = router;

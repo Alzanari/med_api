@@ -7,15 +7,24 @@ const {
   updateMedByMedId,
   deleteMedByMedId,
 } = require("../controllers/med.controller");
-const validator = require("../middlewares/validation.middleware");
+const Jwt = require("../middlewares/validator.middleware");
+const Validator = require("../middlewares/validator.middleware");
 
 // Define routes using the medController methods
-router.route("/").get(validator.allCheck, getAllMeds).post(createMed);
+router
+  .route("/")
+  .get(Validator("allItems", "query"), getAllMeds)
+  .post(Jwt(), Validator("", "body"), createMed);
 
 router
   .route("/:medId")
-  .get(getMedByMedId)
-  .patch(updateMedByMedId)
-  .delete(deleteMedByMedId);
+  .get(Validator("medId", "params"), getMedByMedId)
+  .patch(
+    Jwt(),
+    Validator("medId", "params"),
+    // Validator("", "body"),
+    updateMedByMedId
+  )
+  .delete(Jwt(), Validator("medId", "params"), deleteMedByMedId);
 
 module.exports = router;

@@ -6,10 +6,12 @@ const {
   logout,
   refreshToken,
 } = require("../controllers/auth.controller");
+const Jwt = require("../middlewares/validator.middleware");
+const Validator = require("../middlewares/validator.middleware");
 
 // Define routes using the taskController methods
-router.route("/").get(logout).post(login);
-router.route("/refresh").get(refreshToken);
-router.route("/register").post(register);
+router.route("/").get(Jwt(), logout).post(Validator("login", "body"), login);
+router.route("/refresh").get(Jwt(), refreshToken);
+router.route("/register").post(Validator("createUser", "body"), register);
 
 module.exports = router;

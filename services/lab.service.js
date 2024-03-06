@@ -8,7 +8,7 @@ const allLabs = async (sort, skip, queryLimit) => {
       .skip(skip)
       .limit(parseInt(queryLimit))
       .exec();
-    winston.info(`Found labs: ${result}`);
+    // winston.info(`Found labs: ${result}`);
     return result;
   } catch (error) {
     winston.error(`Error finding labs: ${error}`);
@@ -18,7 +18,7 @@ const allLabs = async (sort, skip, queryLimit) => {
 const labCount = async () => {
   try {
     const result = await Lab.countDocuments();
-    winston.info(`Total labs: ${result}`);
+    // winston.info(`Total labs: ${result}`);
     return result;
   } catch (error) {
     winston.error(`Error counnting labs: ${error}`);
