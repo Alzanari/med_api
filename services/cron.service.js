@@ -1,6 +1,6 @@
 const cron = require("node-cron");
 
-const { getDbRef, getLabs, getMeds } = require("./scrap.service");
+const { getRef, getLabs, getMeds } = require("./scrap.service");
 
 const path = require("path");
 const { readSettings, saveSettings } = require("../utils/writeToJSON.util");
@@ -20,7 +20,7 @@ const getUpdates = cron.schedule("0 3 * * *", async () => {
   winston.info("running Cronjob for data scrapping");
 
   // check the "Dernière mise à jour"/last update in the footer and compare/store it in a json before running the scraper
-  const ref = await getDbRef("https://medicament.ma/");
+  const ref = await getRef("https://medicament.ma/");
 
   // read config file with the last update of the db
   const settings = readSettings(settingsFilePath);
