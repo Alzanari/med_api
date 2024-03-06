@@ -30,8 +30,8 @@ const findType = (str) => {
   }
 
   // if fistwors is a number/empty, type is unknown
-  if (!firstWord || typeof parseInt(firstWord) == "number") {
-    return "";
+  if (!firstWord || !isNaN(firstWord)) {
+    return "n/a";
   }
   // if firstword is from this array type is the whole string
   if (returnAll.includes(firstWord)) {
