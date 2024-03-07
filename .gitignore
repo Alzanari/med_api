@@ -128,6 +128,6 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
-config/cronRef.json
+config/cronRef.config.json
 test.js
 services/scrap/
