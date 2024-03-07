@@ -29,8 +29,8 @@ const getUpdates = cron.schedule("0 3 * * *", async () => {
   if (!settings.updateDate || settings.updateDate != ref.latest) {
     winston.info("new data to fetch");
 
-    await getLabs("https://medicament.ma/laboratoires/");
-    await getMeds("https://medicament.ma/listing-des-medicaments/");
+    await getLabs("https://medicament.ma/laboratoires/", ref.latest);
+    await getMeds("https://medicament.ma/listing-des-medicaments/", ref.latest);
 
     winston.info("data fetched and upserted");
 

@@ -25,8 +25,13 @@ const getRef = async (url) => {
   return res;
 };
 
-const getLabs = async (url, savePath = labsFilePath) => {
+const getLabs = async (url, date, savePath = labsFilePath) => {
   let labs = readSettings(savePath);
+
+  if (date != labs.date) {
+    labs = { step: 0, list: [], latest: [] };
+    saveSettings(savePath, { step: 0, date, list: [], latest: [] });
+  }
 
   switch (labs.step) {
     case 0:
@@ -58,8 +63,13 @@ const getLabs = async (url, savePath = labsFilePath) => {
   }
 };
 
-const getMeds = async (url, savePath = medsFilePath) => {
+const getMeds = async (url, date, savePath = medsFilePath) => {
   let meds = readSettings(savePath);
+
+  if (date != meds.date) {
+    meds = { step: 0, list: [], latest: [] };
+    saveSettings(savePath, { step: 0, date, list: [], latest: [] });
+  }
 
   switch (meds.step) {
     case 0:
@@ -89,7 +99,7 @@ const getMeds = async (url, savePath = medsFilePath) => {
     case 4:
       winston.info("upserting meds data start");
       await upsertList(meds.list, "med");
-      saveSettings(savePath, { step: 0, list: [], latest: meds.list });
+      saveSettings(savePath, { step: 0, date, list: [], latest: meds.list });
       winston.info("upserting meds data done");
       break;
     default:
