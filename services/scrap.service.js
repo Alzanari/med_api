@@ -31,26 +31,26 @@ const getLabs = async (url, savePath = labsFilePath) => {
   switch (labs.step) {
     case 0:
       winston.info("parse lab list start");
-      labs.List = await getList(url);
+      labs.list = await getList(url);
       labs.step = 1;
       saveSettings(savePath, labs);
       winston.info("parse lab list done");
     case 1:
       winston.info("getting labs HTML start");
-      labs.List = await getHtml(labs.List);
+      labs.list = await getHtml(labs.list);
       labs.step = 2;
       saveSettings(savePath, labs);
       winston.info("getting labs HTML done");
     case 2:
       winston.info("getting labs data start");
-      labs.List = getData(labs.List, "lab");
+      labs.list = getData(labs.list, "lab");
       labs.step = 3;
       saveSettings(savePath, labs);
       winston.info("getting labs data done");
     case 3:
       winston.info("upserting labs data start");
-      await upsertList(labs.List, "lab");
-      saveSettings(savePath, { step: 0, List: {}, previous: labs.List });
+      await upsertList(labs.list, "lab");
+      saveSettings(savePath, { step: 0, list: {}, latest: labs.list });
       winston.info("upserting labs data done");
       break;
     default:
@@ -64,32 +64,32 @@ const getMeds = async (url, savePath = medsFilePath) => {
   switch (meds.step) {
     case 0:
       winston.info("parse med list start");
-      meds.List = await getList(url);
+      meds.list = await getList(url);
       meds.step = 1;
       saveSettings(savePath, meds);
       winston.info("parse med list done");
     case 1:
       winston.info("getting meds HTML start");
-      meds.List = await getHtml(meds.List, "med");
+      meds.list = await getHtml(meds.list, "med");
       meds.step = 2;
       saveSettings(savePath, meds);
       winston.info("getting meds HTML done");
     case 2:
       winston.info("getting meds data start");
-      meds.List = getData(meds.List, "med");
+      meds.list = getData(meds.list, "med");
       meds.step = 3;
       saveSettings(savePath, meds);
       winston.info("getting meds data done");
     case 3:
       winston.info("getting similar meds start");
-      meds.List = await getSimAct(meds.List);
+      meds.list = await getSimAct(meds.list);
       meds.step = 4;
       saveSettings(savePath, meds);
       winston.info("getting similar meds done");
     case 4:
       winston.info("upserting meds data start");
-      await upsertList(meds.List, "med");
-      saveSettings(savePath, { step: 0, List: [], previous: meds.List });
+      await upsertList(meds.list, "med");
+      saveSettings(savePath, { step: 0, list: [], latest: meds.list });
       winston.info("upserting meds data done");
       break;
     default:
