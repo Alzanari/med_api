@@ -19,6 +19,5 @@ const logger = winston.createLogger({
     }),
   ],
 });
-logger.error(new Error("winston had an error"));
 
 module.exports = logger;
