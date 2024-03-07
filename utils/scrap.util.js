@@ -85,18 +85,24 @@ const scrapLab = (html) => {
   let res = {};
 
   $("tr").each(function () {
-    const field = $(this).find("td.field").text().trim().split(" ").join("_");
+    let field = $(this)
+      .find("td.field")
+      .text()
+      .trim()
+      .split(" ")
+      .join("_")
+      .toLowerCase();
 
     let value = null;
     switch (field) {
-      case "Siteweb":
+      case "siteweb":
         value = $(this).find("td.value > a").attr("href");
         break;
-      case "Fax":
-      case "Usine_Téléphone":
-      case "Usine_Fax":
-      case "Tlx":
-      case "Téléphone":
+      case "fax":
+      case "usine_téléphone":
+      case "usine_fax":
+      case "tlx":
+      case "téléphone":
         value = [];
         $(this)
           .find("td.value > a")
@@ -110,7 +116,7 @@ const scrapLab = (html) => {
         break;
     }
 
-    res[field.toLowerCase()] = value;
+    res[field] = value;
   });
 
   return res;
@@ -123,59 +129,31 @@ const scrapMed = (html, title) => {
 
   // scrap table body
   $("tr").each(function () {
-    const field = $(this).find("td.field").text().trim().split(" ").join("_");
+    let field = $(this).find("td.field").text().trim().split(" ").join("_");
+    field = field.replace(/'|-|’/g, "__").replace(/\(|\)/g, "_").toLowerCase();
 
     let value = null;
 
-    //field rename
     switch (field) {
-      case "Contres-indication(s)":
-        field = "contres_indication";
-        break;
-      case "Indication(s)":
-        field = "indication";
-        break;
-      case "Age_minimal_d'utilisation":
-        field = "age_minimal_d__utilisation";
-        break;
-      case "Base_de_remboursement_/_ppv":
-        field = "base_de_remboursement_ppv";
-        break;
-      case "Posologies_et_mode_d'administration":
-        field = "posologies_et_mode_d__administration";
-        break;
-      case "Substance_(s)_psychoactive_(s)":
-        field = "substance_psychoactive";
-        break;
-      case "Risque_potentiel_de_dépendance_ou_d’abus":
-        field = "risque_potentiel_de_dépendance_ou_d__abus";
-        break;
-
-      default:
-        break;
-    }
-
-    // value dependant on field
-    switch (field) {
-      case "Particularité":
+      case "particularité":
         value = $(this)
           .find("td.value")
           .text()
           .replace(/\s+/g, " ")
           .replace("Fournisseur : ", "")
           .trim();
-
         break;
-      case "Base_de_remboursement_/_PPV":
-      case "Prix_hospitalier":
-      case "PPC":
-      case "PPV":
+      case "base_de_remboursement_/_ppv":
+        field = "base_de_remboursement_ppv";
+      case "prix_hospitalier":
+      case "ppc":
+      case "ppv":
         let intiVal = $(this).find("td.value").text().trim();
         const numericString = intiVal.replace(" dhs", "");
         value = parseFloat(numericString);
         break;
-      case "Dosage":
-      case "Composition":
+      case "dosage":
+      case "composition":
         let initVal = $(this)
           .find("td.value")
           .text()
@@ -183,11 +161,11 @@ const scrapMed = (html, title) => {
           .trim();
         value = initVal.split(/ \| /g);
         break;
-      case "Boîte":
-      case "Lien_du_Produit":
-      case "Notice_en_arabe":
-      case "Notice_en_français":
-      case "RCP":
+      case "boîte":
+      case "lien_du_produit":
+      case "notice_en_arabe":
+      case "notice_en_français":
+      case "rcp":
         value = $(this).find("td.value > a").attr("href");
         break;
 
@@ -196,7 +174,7 @@ const scrapMed = (html, title) => {
         break;
     }
 
-    res[field.toLowerCase()] = value;
+    res[field] = value;
   });
 
   // get similar meds link
