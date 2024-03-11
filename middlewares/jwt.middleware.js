@@ -3,8 +3,7 @@ const winston = require("../config/winston.config");
 
 module.exports = function () {
   return async function (req, res, next) {
-    const authHeader = req.headers["Authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
+    const token = req.cookies.accessToken;
 
     if (!token) {
       const tokenNotFoundError = new Error("unauthorized! token not provided");

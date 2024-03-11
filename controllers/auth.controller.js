@@ -43,7 +43,7 @@ const login = async (req, res) => {
     }
 
     const accessToken = jwt.sign({ email }, process.env.SECRET_KEY, {
-      expiresIn: "1h",
+      expiresIn: "3m",
     });
     const refreshToken = jwt.sign({ email }, process.env.REFRESH_SECRET_KEY);
 
@@ -51,8 +51,17 @@ const login = async (req, res) => {
     await updateUser(email, { refreshToken });
 
     // Set the token and refresh token as a cookie
-    res.cookie("refreshToken", refreshToken, { httpOnly: true });
-    res.status(200).json({ accessToken });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "Lax",
+    });
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "Lax",
+    });
+    res.status(200).json({ message: "Authentication successful" });
   } catch (error) {
     winston.error(error.message);
     res.status(500).json({ error: "Internal server error" });
@@ -68,7 +77,7 @@ const logout = async (req, res) => {
 
     // Clear the token and refresh token cookie
     res.clearCookie("refreshToken");
-    res.clearCookie("jwtToken");
+    res.clearCookie("accessToken");
     res.status(200).json({ message: "Logged out" });
   } catch (error) {
     winston.error(error.message);
@@ -104,10 +113,14 @@ const refreshToken = async (req, res) => {
         { email: user.email },
         process.env.SECRET_KEY,
         {
-          expiresIn: "1h",
+          expiresIn: "3m",
         }
       );
-      res.cookie("jwtToken", accessToken, { httpOnly: true });
+      res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "Lax",
+      });
       res.status(200).json({ message: "New token sent successfully" });
     });
   } catch (error) {
