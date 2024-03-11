@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const helmet = require("helmet");
 const { apiLimiter } = require("./middlewares/rateLimit.middleware");
 const winston = require("./config/winston.config");
 const mongoose = require("mongoose");
@@ -8,9 +9,10 @@ const User = require("./models/user.model");
 
 const app = express();
 
+app.use(helmet());
 app.use(express.json({ limit: "2mb" }));
-app.use(cookieParser());
 app.use(express.urlencoded({ extended: true, limit: "2mb" }));
+app.use(cookieParser());
 
 // error handling for uncaught and unhandled
 process.on("uncaughtException", (error) => {
