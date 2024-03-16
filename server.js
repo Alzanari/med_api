@@ -52,11 +52,13 @@ mongoose.connection.on("open", async function () {
 
 // routes config
 const authRouter = require("./routes/auth.route");
+const rawRouter = require("./routes/raw.route");
 const labRouter = require("./routes/lab.route");
 const medRouter = require("./routes/med.route");
 const userRouter = require("./routes/user.route");
 app.use("/v1/auth", authRouter);
 app.use("/v1/labs", labRouter);
+app.use("/v1/raws", rawRouter);
 app.use("/v1/meds", medRouter);
 app.use("/v1/users", userRouter);
 

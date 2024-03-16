@@ -1,5 +1,6 @@
 const login = require("./auth.validator");
 const { allItems, createItem } = require("./common.validator");
+const { rawRef, rawFields, allRaws } = require("./raws.validator");
 const { labTitle, labFields, allLabs } = require("./labs.validator");
 const { medId, medFields, allMeds } = require("./meds.validator");
 const {
@@ -12,6 +13,9 @@ const {
 module.exports = {
   login,
   allItems,
+  rawRef,
+  rawFields,
+  allRaws,
   createItem,
   labTitle,
   labFields,
