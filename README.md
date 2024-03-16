@@ -4,15 +4,17 @@ An API for scraping and tracking medication data in morocco, based on [medicamen
 
 ## Features
 
-- scrap medications and labs data from [medicament.ma](https://medicament.ma/)
-  - daily check for changed based on last update in the footer
-  - robust multistep process during scraping that support continuation
-  - reasonable automatic data sanitisation
+- Scrap medications and labs data from [medicament.ma](https://medicament.ma/)
+  - Daily check for changed based on last update in the footer
+  - Robust multistep process during scraping that support continuation
+  - Reasonable automatic data sanitisation
 - A comprehenssive API that follows standard best practices
 
 ## Roadmap
 
-- keep on the changed field in diff objects in step 5 in med scrap
+- Extract therapeutic class and sub-classes based on the ATC code (up to level 3)
+
+- Keep on the changed field in diff objects in step 5 in med scrap
 
 - Implement history for meds collection based on [this](https://stackoverflow.com/a/57719789/19436394)
 
