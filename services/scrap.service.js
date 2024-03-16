@@ -39,21 +39,21 @@ const getLabs = async (url, refWeb, savePath = labsFilePath) => {
       winston.info("parsing lab list");
       labs.list = await getList(url);
       labs.step = 1;
-      saveSettings(savePath, labs);
+      saveSettings(savePath, labs, "saved lab step 0");
     case 1:
       winston.info("fetching labs HTML");
       labs.list = await getHtml(labs.list);
       labs.step = 2;
-      saveSettings(savePath, labs);
+      saveSettings(savePath, labs, "saved lab step 1");
     case 2:
       winston.info("extreacting labs data");
       labs.list = getData(labs.list, "lab");
       labs.step = 3;
-      saveSettings(savePath, labs);
+      saveSettings(savePath, labs, "saved lab step 2");
     case 3:
       winston.info("upserting labs data");
       await upsertList(labs.list, "lab");
-      saveSettings(savePath, { step: 0, ref: 0, list: {} });
+      saveSettings(savePath, { step: 0, ref: 0, list: {} }, "saved lab step 3");
       break;
     default:
       break;
@@ -73,29 +73,29 @@ const getMeds = async (url, refWeb, savePath = medsFilePath) => {
       winston.info("parsing med list");
       meds.list = await getList(url);
       meds.step = 1;
-      saveSettings(savePath, meds);
+      saveSettings(savePath, meds, "saved med step 0");
     case 1:
       winston.info("fetching meds HTML");
       meds.list = await getHtml(meds.list, "med");
       meds.step = 2;
-      saveSettings(savePath, meds);
+      saveSettings(savePath, meds, "saved med step 1");
     case 2:
       winston.info("extreacting meds data");
       meds.list = getData(meds.list, "med");
       meds.step = 3;
-      saveSettings(savePath, meds);
+      saveSettings(savePath, meds, "saved med step 2");
     case 3:
       winston.info("parsing similar/active substance meds");
       meds.list = await getSimAct(meds.list);
       meds.step = 4;
-      saveSettings(savePath, meds);
+      saveSettings(savePath, meds, "saved med step 3");
     case 4:
       winston.info("upserting meds raws");
       await updateRaw(refWeb.ref, meds.list);
     case 5:
       winston.info("upserting meds data");
       await upsertList(meds.list, "med");
-      saveSettings(savePath, { step: 0, ref: 0, list: {} });
+      saveSettings(savePath, { step: 0, ref: 0, list: {} }, "saved med step 5");
       break;
     default:
       break;

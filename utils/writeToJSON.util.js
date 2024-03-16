@@ -11,11 +11,12 @@ const readSettings = (path) => {
   }
 };
 
-const saveSettings = (path, data) => {
+const saveSettings = (path, data, message) => {
   try {
     const jsonData = JSON.stringify(data, null, 2);
     fs.writeFileSync(path, jsonData, "utf8");
-    winston.info(`JSON saved successfully to: ${path}`);
+    let log = message ?? `JSON saved successfully to: ${path}`;
+    winston.info(log);
   } catch (error) {
     winston.error(`Error saving settings: ${error}`);
   }
