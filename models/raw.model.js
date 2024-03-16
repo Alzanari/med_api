@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const rawSchema = new mongoose.Schema(
+const RawSchema = new mongoose.Schema(
   {
     date: {
       type: Date,
@@ -17,6 +17,10 @@ const rawSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Raw = mongoose.model("Raw", rawSchema);
+RawSchema.pre("find", function () {
+  this.select("-_id -__v -createdAt -updatedAt");
+});
+
+const Raw = mongoose.model("Raw", RawSchema);
 
 module.exports = Raw;

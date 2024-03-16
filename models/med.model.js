@@ -57,6 +57,22 @@ MedSchema.virtual(
   { toJSON: { virtuals: true } }
 );
 
+MedSchema.pre("find", function () {
+  this.select("-_id -__v -createdAt -updatedAt");
+  this.populate({
+    path: "distributeur_ou_fabriquant",
+    select: "title link",
+  });
+  this.populate({
+    path: "similar",
+    select: "title link",
+  });
+  this.populate({
+    path: "activeSubstance",
+    select: "title link",
+  });
+});
+
 const Med = mongoose.model("Med", MedSchema);
 
 module.exports = Med;

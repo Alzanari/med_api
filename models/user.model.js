@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const userSchema = new mongoose.Schema(
+const UserSchema = new mongoose.Schema(
   {
     email: {
       type: String,
@@ -16,6 +16,10 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const User = mongoose.model("User", userSchema);
+UserSchema.pre("find", function () {
+  this.select("-_id -__v -createdAt -updatedAt");
+});
+
+const User = mongoose.model("User", UserSchema);
 
 module.exports = User;

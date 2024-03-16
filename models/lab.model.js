@@ -16,6 +16,10 @@ const LabSchema = new mongoose.Schema(
   { strict: false, timestamps: true }
 );
 
+LabSchema.pre("find", function () {
+  this.select("-_id -__v -createdAt -updatedAt");
+});
+
 const Lab = mongoose.model("Lab", LabSchema);
 
 module.exports = Lab;

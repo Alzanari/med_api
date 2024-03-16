@@ -4,18 +4,6 @@ const winston = require("../config/winston.config");
 const allMeds = async (sort, skip, queryLimit) => {
   try {
     const result = await Med.find()
-      .populate({
-        path: "distributeur_ou_fabriquant",
-        select: "title link -_medId",
-      })
-      .populate({
-        path: "similar",
-        select: "title link -_medId",
-      })
-      .populate({
-        path: "activeSubstance",
-        select: "title link -_medId",
-      })
       .sort(sort)
       .skip(skip)
       .limit(parseInt(queryLimit))
