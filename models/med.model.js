@@ -43,7 +43,7 @@ MedSchema.virtual(
     foreignField: "similar",
     justOne: false,
   },
-  { toJSON: { virtuals: true } }
+  { toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
 MedSchema.virtual(
@@ -54,23 +54,33 @@ MedSchema.virtual(
     foreignField: "activeSubstance",
     justOne: false,
   },
-  { toJSON: { virtuals: true } }
+  { toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
-MedSchema.pre("find", function () {
+MedSchema.pre("find", function (next) {
   this.select("-_id -__v -createdAt -updatedAt");
-  this.populate({
-    path: "distributeur_ou_fabriquant",
-    select: "title link",
-  });
-  this.populate({
-    path: "similar",
-    select: "title link",
-  });
-  this.populate({
-    path: "activeSubstance",
-    select: "title link",
-  });
+
+  if (this.options._recursed) {
+    return next();
+  }
+  this.populate([
+    {
+      path: "distributeur_ou_fabriquant",
+      select: "title link -_id",
+      options: { _recursed: true },
+    },
+    {
+      path: "similar",
+      select: "title link -_id",
+      options: { _recursed: true },
+    },
+    {
+      path: "activeSubstance",
+      select: "title link -_id",
+      options: { _recursed: true },
+    },
+  ]);
+  next();
 });
 
 const Med = mongoose.model("Med", MedSchema);
