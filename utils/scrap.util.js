@@ -3,6 +3,8 @@ const https = require("https");
 const axiosRetry = require("axios-retry").default;
 const cheerio = require("cheerio");
 
+const { DateTime } = require("luxon");
+
 const { getAttributes } = require("./attribute.util");
 
 const winston = require("../config/winston.config");
@@ -204,9 +206,12 @@ const getDbRef = async (url) => {
     httpsAgent: new https.Agent({ keepAlive: true }),
   });
   const $ = cheerio.load(html.data);
-  let latest = $("footer .meta").first().text();
+  let date = $("footer .meta").first().text();
   let ref = $("footer .meta").last().text();
-  return { latest, ref };
+
+  // parse the date into a date object
+  date = DateTime.fromFormat(date, "d LLLL yyyy", { locale: "fr" });
+  return { date, ref };
 };
 
 module.exports = {
