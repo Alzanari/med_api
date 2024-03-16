@@ -1,5 +1,8 @@
 const winston = require("../config/winston.config");
 
+const differenceWith = require("lodash.differencewith");
+const isEqual = require("lodash.isequal");
+
 const path = require("path");
 const { readSettings, saveSettings } = require("../utils/writeToJSON.util");
 
@@ -20,6 +23,7 @@ const {
   medSimActBulkUpsert,
 } = require("./bulk.service");
 const { updateRaw } = require("./raw.service");
+const { allMeds } = require("./med.service");
 
 const getRef = async (url) => {
   let res = getDbRef(url);
@@ -52,6 +56,7 @@ const getLabs = async (url, refWeb, savePath = labsFilePath) => {
       saveSettings(savePath, labs, "saved lab step 2");
     case 3:
       winston.info("upserting labs data");
+      labs.list = labs.list.flat();
       await upsertList(labs.list, "lab");
       saveSettings(savePath, { step: 0, ref: 0, list: {} }, "saved lab step 3");
       break;
@@ -91,10 +96,19 @@ const getMeds = async (url, refWeb, savePath = medsFilePath) => {
       saveSettings(savePath, meds, "saved med step 3");
     case 4:
       winston.info("upserting meds raws");
+      meds.list = meds.list.flat();
       await updateRaw(refWeb.ref, meds.list);
     case 5:
       winston.info("upserting meds data");
-      await upsertList(meds.list, "med");
+      // get meds from db
+      let dbMeds = allMeds({}, 0, 0);
+      // find the differences between web list and db list, with web list as source of truth
+      let diff = differenceWith(
+        JSON.stringify(meds.list),
+        JSON.stringify(dbMeds),
+        isEqual
+      );
+      await upsertList(diff, "med");
       saveSettings(savePath, { step: 0, ref: 0, list: {} }, "saved med step 5");
       break;
     default:
@@ -170,7 +184,6 @@ const getSimAct = async (lists) => {
   return lists;
 };
 const upsertList = async (lists, type) => {
-  lists = lists.flat();
   if (type == "lab") {
     await labBulkUpsert(lists);
     winston.info(`labs bulk upsert is done`);
