@@ -16,7 +16,7 @@
     "cron"
   ],
   "author": "Al Zanari",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/Alzanari/med_api/issues"
   },
