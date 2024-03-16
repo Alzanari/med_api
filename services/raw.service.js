@@ -28,7 +28,7 @@ const rawCount = async () => {
 const rawByRef = async (ref) => {
   try {
     const result = await Raw.findOne({ ref });
-    winston.info(`Found raw: ${result}`);
+    // winston.info(`Found raw: ${result}`);
     return result;
   } catch (error) {
     winston.error(`Error finding raw: ${error}`);
@@ -39,7 +39,7 @@ const insertRaw = async (ref, date) => {
   try {
     const newRaw = new Raw({ ref, date });
     const result = await newRaw.save();
-    winston.info(`Inserted raw: ${result}`);
+    // winston.info(`Inserted raw: ${result}`);
     return result;
   } catch (error) {
     winston.error(`Error inserting raw: ${error}`);
@@ -53,7 +53,7 @@ const updateRaw = async (ref, raw) => {
       { $set: raw },
       { new: true }
     );
-    winston.info(`Updated raw: ${result}`);
+    // winston.info(`Updated raw: ${result}`);
     return result;
   } catch (error) {
     winston.error(`Error updating raw: ${error}`);
@@ -63,7 +63,7 @@ const updateRaw = async (ref, raw) => {
 const deleteRaw = async (ref) => {
   try {
     const result = await Raw.findOneAndDelete({ ref });
-    winston.info(`Removed raw: ${result}`);
+    // winston.info(`Removed raw: ${result}`);
     return result;
   } catch (error) {
     winston.error(`Error removing raw: ${error}`);

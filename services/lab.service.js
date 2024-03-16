@@ -28,7 +28,7 @@ const labCount = async () => {
 const labByTitle = async (title) => {
   try {
     const result = await Lab.findOne({ title });
-    winston.info(`Found lab: ${result}`);
+    // winston.info(`Found lab: ${result}`);
     return result;
   } catch (error) {
     winston.error(`Error finding lab: ${error}`);
@@ -39,7 +39,7 @@ const insertLab = async (title, link) => {
   try {
     const newLab = new Lab({ title, link });
     const result = await newLab.save();
-    winston.info(`Inserted lab: ${result}`);
+    // winston.info(`Inserted lab: ${result}`);
     return result;
   } catch (error) {
     winston.error(`Error inserting lab: ${error}`);
@@ -53,7 +53,7 @@ const updateLab = async (title, labData) => {
       { $set: labData },
       { new: true }
     );
-    winston.info(`Updated lab: ${result}`);
+    // winston.info(`Updated lab: ${result}`);
     return result;
   } catch (error) {
     winston.error(`Error updating lab: ${error}`);
@@ -63,7 +63,7 @@ const updateLab = async (title, labData) => {
 const deleteLab = async (title) => {
   try {
     const result = await Lab.findOneAndDelete({ title });
-    winston.info(`Removed lab: ${result}`);
+    // winston.info(`Removed lab: ${result}`);
     return result;
   } catch (error) {
     winston.error(`Error removing lab: ${error}`);
