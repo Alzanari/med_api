@@ -130,4 +130,3 @@ dist
 .pnp.*
 config/cronRef.config.json
 test.js
-services/scrap/

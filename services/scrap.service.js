@@ -3,8 +3,8 @@ const winston = require("../config/winston.config");
 const path = require("path");
 const { readSettings, saveSettings } = require("../utils/writeToJSON.util");
 
-const medsFilePath = path.join(__dirname, ".", "scrap", "med.scrap.json");
-const labsFilePath = path.join(__dirname, ".", "scrap", "lab.scrap.json");
+const medsFilePath = path.join(__dirname, "..", "logs", "med.scrap.json");
+const labsFilePath = path.join(__dirname, "..", "logs", "lab.scrap.json");
 
 const {
   scrapList,
