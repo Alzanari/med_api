@@ -19,18 +19,19 @@ const {
   medBulkUpsert,
   medSimActBulkUpsert,
 } = require("./bulk.service");
+const { updateRaw } = require("./raw.service");
 
 const getRef = async (url) => {
   let res = getDbRef(url);
   return res;
 };
 
-const getLabs = async (url, date, savePath = labsFilePath) => {
+const getLabs = async (url, refWeb, savePath = labsFilePath) => {
   let labs = readSettings(savePath);
 
-  if (date != labs.date) {
-    labs = { step: 0, list: [], latest: [] };
-    saveSettings(savePath, { step: 0, date, list: [], latest: [] });
+  if (refWeb.ref != labs.ref) {
+    labs = { step: 0, ref: refWeb.ref, list: {} };
+    saveSettings(savePath, labs);
   }
 
   switch (labs.step) {
@@ -55,7 +56,7 @@ const getLabs = async (url, date, savePath = labsFilePath) => {
     case 3:
       winston.info("upserting labs data start");
       await upsertList(labs.list, "lab");
-      saveSettings(savePath, { step: 0, list: {}, latest: labs.list });
+      saveSettings(savePath, { step: 0, ref: 0, list: {} });
       winston.info("upserting labs data done");
       break;
     default:
@@ -63,12 +64,12 @@ const getLabs = async (url, date, savePath = labsFilePath) => {
   }
 };
 
-const getMeds = async (url, date, savePath = medsFilePath) => {
+const getMeds = async (url, refWeb, savePath = medsFilePath) => {
   let meds = readSettings(savePath);
 
-  if (date != meds.date) {
-    meds = { step: 0, list: [], latest: [] };
-    saveSettings(savePath, { step: 0, date, list: [], latest: [] });
+  if (refWeb.ref != meds.ref) {
+    meds = { step: 0, ref: refWeb.ref, list: {} };
+    saveSettings(savePath, meds);
   }
 
   switch (meds.step) {
@@ -97,9 +98,13 @@ const getMeds = async (url, date, savePath = medsFilePath) => {
       saveSettings(savePath, meds);
       winston.info("getting similar meds done");
     case 4:
+      winston.info("upserting meds raws start");
+      await updateRaw(refWeb.ref, meds.list);
+      winston.info("upserting meds raws done");
+    case 5:
       winston.info("upserting meds data start");
       await upsertList(meds.list, "med");
-      saveSettings(savePath, { step: 0, date, list: [], latest: meds.list });
+      saveSettings(savePath, { step: 0, ref: 0, list: {} });
       winston.info("upserting meds data done");
       break;
     default:

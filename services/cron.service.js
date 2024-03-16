@@ -1,41 +1,31 @@
 const cron = require("node-cron");
 
 const { getRef, getLabs, getMeds } = require("./scrap.service");
-
-const path = require("path");
-const { readSettings, saveSettings } = require("../utils/writeToJSON.util");
+const { allRaws, insertRaw } = require("./raw.service");
 
 const winston = require("../config/winston.config");
-
-// path to json config file
-const settingsFilePath = path.join(
-  __dirname,
-  "..",
-  "config",
-  "cronRef.config.json"
-);
 
 // cron job is 0 3 * * * which means everyday at 3AM
 const getUpdates = cron.schedule("0 3 * * *", async () => {
   winston.info("running Cronjob for data scrapping");
 
   // check the "Dernière mise à jour"/last update in the footer and compare/store it in a json before running the scraper
-  const ref = await getRef("https://medicament.ma/");
+  const refWeb = await getRef("https://medicament.ma/");
 
   // read config file with the last update of the db
-  const settings = readSettings(settingsFilePath);
+  const refDB = allRaws({ date: -1 }, 0, 1);
 
   // if config is empty or config last update is different than current last update, scrap the new data
-  if (!settings.updateDate || settings.updateDate != ref.latest) {
+  if (!refDB || refDB != refWeb.ref) {
     winston.info("new data to fetch");
 
-    await getLabs("https://medicament.ma/laboratoires/", ref.latest);
-    await getMeds("https://medicament.ma/listing-des-medicaments/", ref.latest);
+    // create raw document
+    await insertRaw(refWeb.ref, refWeb.date);
+
+    await getLabs("https://medicament.ma/laboratoires/", refWeb);
+    await getMeds("https://medicament.ma/listing-des-medicaments/", refWeb);
 
     winston.info("data fetched and upserted");
-
-    // save the new db ref
-    saveSettings(settingsFilePath, ref);
   }
 });
 
