@@ -210,7 +210,7 @@ const getDbRef = async (url) => {
   let ref = $("footer .meta").last().text();
 
   // parse the date into a date object
-  date = DateTime.fromFormat(date, "d LLLL yyyy", { locale: "fr" });
+  date = DateTime.fromFormat(date, "d LLLL yyyy", { locale: "fr" }).toString();
   return { date, ref };
 };
 
