@@ -13,7 +13,7 @@ const getUpdates = cron.schedule("0 3 * * *", async () => {
   const refWeb = await getRef("https://medicament.ma/");
 
   // read config file with the last update of the db
-  const refDB = allRaws({ date: -1 }, 0, 1);
+  const refDB = await allRaws({ date: -1 }, 0, 1);
 
   // if config is empty or config last update is different than current last update, scrap the new data
   if (!refDB || refDB != refWeb.ref) {
